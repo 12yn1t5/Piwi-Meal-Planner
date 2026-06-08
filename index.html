@@ -70,10 +70,11 @@ footer{text-align:center;color:var(--muted);padding:22px;font-size:13px}
 <nav class="no-print">
   <button class="active" onclick="showPage('dashboard', this)">Dashboard</button>
   <button onclick="showPage('foodsPage', this)">Foods</button>
+  <button onclick="showPage('customFoodPage', this)">Custom Food</button>
   <button onclick="showPage('plannerPage', this)">Meal Plan</button>
   <button onclick="showPage('groceryPage', this)">Grocery</button>
   <button onclick="showPage('trackerPage', this)">Daily Tracker</button>
-  <button onclick="showPage('libraryPage', this)">Food Library</button>
+  <button onclick="showPage('recipesPage', this)">Recipes</button>
 </nav>
 
 <section id="dashboard" class="page active">
@@ -86,11 +87,15 @@ footer{text-align:center;color:var(--muted);padding:22px;font-size:13px}
     <h2>Dashboard</h2>
     <div class="stats">
       <div class="stat"><b id="score">0%</b><span>Weekly score</span></div>
-      <div class="stat"><b id="smoothieStreak">0</b><span>Smoothie days</span></div>
-      <div class="stat"><b id="teaStreak">0</b><span>Tea days</span></div>
-      <div class="stat"><b id="avgWater">0</b><span>Avg water oz</span></div>
+      <div class="stat"><b id="movementDays">0</b><span>Movement days</span></div>
+      <div class="stat"><b id="workoutMinutes">0</b><span>Workout minutes</span></div>
+      <div class="stat"><b id="avgWater">0</b><span>Avg water</span></div>
+      <div class="stat"><b id="mealQuality">0/5</b><span>Meal quality</span></div>
+      <div class="stat"><b id="topCraving">—</b><span>Top craving</span></div>
+      <div class="stat"><b id="avgSatisfaction">—</b><span>Avg satisfaction</span></div>
+      <div class="stat"><b id="waterUnitDash">oz</b><span>Water unit</span></div>
     </div>
-    <p class="small">Score is based on smoothie, flaxseed, tea, water goal, meal check-in, and daily notes.</p>
+    <p class="small">Score is based on water, main meal, movement, meal quality, satisfaction, cravings, energy, hunger, and notes.</p>
   </section>
   <section class="card">
     <h2>Today’s focus</h2>
@@ -102,7 +107,7 @@ footer{text-align:center;color:var(--muted);padding:22px;font-size:13px}
   <div class="grid">
     <section class="card">
       <h2>Foods available this week</h2>
-      <p class="small">Enter one food per line. Use normal names like chicken, liver, beans, sweet potatoes, spinach, rice, avocado.</p>
+      <p class="small">Enter one food per line. Use normal names like chicken, beans, matooke, spinach, rice, avocado, popcorn, peanuts, cashews, mango, or apples.</p>
       <textarea id="foods">Roasted chicken
 Veggie mix spinach kale
 Sweet potatoes
@@ -124,6 +129,53 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
   </section>
 </section>
 
+
+<section id="customFoodPage" class="page">
+  <div class="grid">
+    <section class="card">
+      <h2>Smart Assisted Custom Food Builder</h2>
+      <p class="small">Add foods Piwi does not know yet. The smart suggestion gives you a starter benefit/note that you can edit.</p>
+
+      <label>Food name</label>
+      <input id="customFoodName" placeholder="e.g. cassava chips, mandazi, turkey stew">
+
+      <label>Category</label>
+      <select id="customFoodCat">
+        <option>Protein</option>
+        <option>Vegetable</option>
+        <option>Carb</option>
+        <option>Fruit</option>
+        <option>Snack</option>
+        <option>Healthy Fat</option>
+        <option>Mixed Dish</option>
+        <option>Flavor</option>
+      </select>
+
+      <button id="suggestFoodBtn">Suggest Benefit + Note</button>
+
+      <label>Benefit / value</label>
+      <textarea id="customFoodBenefit" placeholder="Short benefit..."></textarea>
+
+      <label>Note / caution</label>
+      <textarea id="customFoodCaution" placeholder="Short note..."></textarea>
+
+      <label><input type="checkbox" id="customUseMeal" checked> Use in meal planning</label>
+      <label><input type="checkbox" id="customUseSnack"> Use as snack/fruit option</label>
+
+      <button id="saveCustomFoodBtn">Save Custom Food</button>
+      <button id="clearCustomFormBtn" class="secondary">Clear Form</button>
+    </section>
+
+    <section class="card">
+      <h2>Saved custom foods</h2>
+      <p class="small">These save on this device and appear in food analysis, grocery categories, and planning.</p>
+      <div id="customFoodList">No custom foods saved yet.</div>
+      <button id="exportCustomFoodsBtn" class="secondary">Export Custom Foods</button>
+      <button id="clearCustomFoodsBtn" class="danger">Clear Custom Foods</button>
+    </section>
+  </div>
+</section>
+
 <section id="plannerPage" class="page">
   <div class="card">
     <h2>Meal plan settings</h2>
@@ -138,6 +190,7 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
   <section class="card">
     <h2>Meal plan</h2>
     <div id="plan">Tap <b>Generate Meal Plan</b>.</div>
+    <div id="snackPlan" class="info" style="margin-top:10px">Snacks and fruits will appear here after generating a meal plan.</div>
     <div id="dynamicTip" class="tip"><b>Plate guide:</b> Aim for ½ vegetables, ¼ protein, ¼ starch. Keep meals simple and realistic.</div>
   </section>
 </section>
@@ -156,33 +209,50 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
   <div class="grid">
     <section class="card">
       <h2>Daily tracker</h2>
-      <label><input type="checkbox" id="smoothie"> Green smoothie</label>
-      <label><input type="checkbox" id="flax"> Flaxseed added</label>
-      <label><input type="checkbox" id="tea"> Herbal tea</label>
       <label><input type="checkbox" id="meal"> Main meal eaten</label>
+
+      <h3>Meal quality</h3>
+      <p class="small">Check what your main meal included. No calories, no grams — just balance.</p>
+      <label><input type="checkbox" id="mealProtein"> Protein</label>
+      <label><input type="checkbox" id="mealVeg"> Vegetables</label>
+      <label><input type="checkbox" id="mealStarch"> Starch / carb</label>
+      <label><input type="checkbox" id="mealFruit"> Fruit</label>
+      <label><input type="checkbox" id="mealFat"> Healthy fat</label>
+
       <div class="row">
-        <div><label>Water oz</label><input id="water" type="number" placeholder="50"></div>
-        <div><label>Water goal oz</label><input id="waterGoal" type="number" value="50"></div>
-        <div><label>Weight</label><input id="weight" type="number" step="0.1" placeholder="optional"></div>
+        <div><label>Meal satisfaction</label><select id="satisfaction"><option value="">Select</option><option>Still hungry</option><option>Okay</option><option>Satisfied</option><option>Too full</option></select></div>
+        <div><label>Strongest craving</label><select id="craving"><option value="">Select</option><option>None</option><option>Sweet</option><option>Salty</option><option>Crunchy</option><option>Fried foods</option><option>Comfort foods</option></select></div>
+        <div><label>Energy</label><select id="energy"><option value="">Select</option><option>Great</option><option>Good</option><option>Okay</option><option>Low</option></select></div>
       </div>
-      <label>Energy</label>
-      <select id="energy"><option value="">Select</option><option>Great</option><option>Good</option><option>Okay</option><option>Low</option></select>
+
       <label>Hunger before main meal</label>
       <select id="hunger"><option value="">Select</option><option>Not hungry</option><option>A little hungry</option><option>Very hungry</option><option>Too hungry</option></select>
+
+      <h3>Movement</h3>
+      <label><input type="checkbox" id="movement"> Movement or exercise done</label>
+      <div class="row">
+        <div><label>Exercise type</label><select id="exerciseType"><option value="">Select</option><option>Walk</option><option>Run</option><option>Gym/Strength</option><option>Yoga/Stretching</option><option>Dance</option><option>Home workout</option><option>Other</option></select></div>
+        <div><label>Exercise minutes</label><input id="exerciseMinutes" type="number" placeholder="e.g. 30"></div>
+        <div><label>Movement level</label><select id="movementLevel"><option value="">Select</option><option>Light</option><option>Moderate</option><option>Strong</option></select></div>
+      </div>
+
+      <h3>Water</h3>
+      <div class="row">
+        <div><label>Water amount</label><input id="water" type="number" step="0.1" placeholder="e.g. 50 or 2"></div>
+        <div><label>Water unit</label><select id="waterUnit"><option value="oz">oz</option><option value="L">liters</option></select></div>
+        <div><label>Water goal</label><input id="waterGoal" type="number" step="0.1" value="50"></div>
+      </div>
+      <label>Water goal unit</label>
+      <select id="waterGoalUnit"><option value="oz">oz</option><option value="L">liters</option></select>
+
+      <label>Weight optional</label>
+      <input id="weight" type="number" step="0.1" placeholder="optional">
+
       <label>Notes</label>
-      <textarea id="notes" placeholder="Cravings, period symptoms, mood, workout, food notes..."></textarea>
+      <textarea id="notes" placeholder="Cravings, mood, workout, food notes..."></textarea>
       <button id="saveBtn">Save Today</button>
       <button id="exportBtn" class="secondary">Export Log CSV</button>
       <button id="clearBtn" class="danger">Clear Saved Log</button>
-    </section>
-    <section class="card">
-      <h2>Smoothie guide</h2>
-      <table>
-        <tr><th>Base</th><th>Simple recipe</th><th>Upgrade</th></tr>
-        <tr><td>Greens</td><td>Spinach + celery</td><td>Use more spinach than celery for smoother texture</td></tr>
-        <tr><td>Flavor</td><td>Green apple + ginger + lemon</td><td>Use ½ apple for lower sugar</td></tr>
-        <tr><td>Balance</td><td>Flaxseed + optional Greek yogurt</td><td>Use 1 tbsp ground flaxseed; ¼ cup Greek yogurt for more protein</td></tr>
-      </table>
     </section>
   </div>
   <section class="card">
@@ -191,17 +261,17 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
   </section>
 </section>
 
-<section id="libraryPage" class="page">
+<section id="recipesPage" class="page">
   <section class="card">
-    <h2>Food library</h2>
-    <p class="small">These are built-in quick notes. When a food appears in your weekly list, its card is shown on the Foods page.</p>
+    <h2>Recipes</h2>
+    <p class="small">Simple recipe ideas. Food benefits now appear in the Foods tab when you analyze weekly foods.</p>
     <div id="libraryList"></div>
   </section>
 </section>
 
 </main>
 
-<footer>Piwi Meal Planner v3.1 · Simple planning. Better eating.</footer>
+<footer>Piwi Meal Planner v3.6<br><em>Simple planning. Better eating.</em></footer>
 
 <script>
 const foodDB = [
@@ -232,7 +302,39 @@ const foodDB = [
  {keys:["banana","bananas"], name:"Banana", cat:"Fruit", benefits:"Adds potassium, sweetness, and creaminess.", caution:"Can make smoothies more calorie/sugar heavy if combined with other fruits."},
  {keys:["berries","berry"], name:"Berries", cat:"Fruit", benefits:"Lower-sugar fruit option with fiber and antioxidants.", caution:"Can be expensive; frozen berries are a good option."},
  {keys:["ginger"], name:"Ginger", cat:"Flavor", benefits:"Adds strong flavor and may support digestion.", caution:"Too much can taste sharp or bother reflux."},
- {keys:["lemon"], name:"Lemon", cat:"Flavor", benefits:"Brightens smoothies/tea and helps flavor without sugar.", caution:"Acidic; rinse mouth with water if using often."}
+ {keys:["lemon"], name:"Lemon", cat:"Flavor", benefits:"Brightens smoothies/tea and helps flavor without sugar.", caution:"Acidic; rinse mouth with water if using often."},
+ {keys:["matooke","matoke"], name:"Matooke", cat:"Carb", benefits:"Traditional Ugandan staple; filling and pairs well with beans, fish, meat, or greens.", caution:"Portion matters, especially with oily sauces."},
+ {keys:["posho","ugali","cornmeal"], name:"Posho/Ugali", cat:"Carb", benefits:"Filling staple that pairs well with beans, greens, fish, or meat.", caution:"Easy to over-serve; balance with vegetables and protein."},
+ {keys:["cassava","muwogo"], name:"Cassava/Muwogo", cat:"Carb", benefits:"Filling traditional starch and good energy source.", caution:"Boiled or steamed is lighter than fried."},
+ {keys:["gonja"], name:"Gonja", cat:"Carb", benefits:"Roasted plantain-style snack/starch with potassium.", caution:"Fried gonja adds more calories."},
+ {keys:["dodo","amaranth"], name:"Dodo/Amaranth Greens", cat:"Vegetable", benefits:"Common Ugandan greens with fiber, minerals, and good meal volume.", caution:"Go easy on added oil and salt."},
+ {keys:["nakati"], name:"Nakati", cat:"Vegetable", benefits:"Traditional Ugandan green; adds fiber and micronutrients.", caution:"Can taste bitter; balance with tomatoes, onions, or groundnut sauce."},
+ {keys:["sukuma","sukuma wiki","collard"], name:"Sukuma Wiki/Collard Greens", cat:"Vegetable", benefits:"Affordable leafy green that adds fiber and bulk.", caution:"Avoid overcooking with too much oil."},
+ {keys:["okra"], name:"Okra", cat:"Vegetable", benefits:"Adds fiber and texture; works well in stews.", caution:"Texture can be slimy if that bothers you."},
+ {keys:["eggplant","biringanya"], name:"Eggplant/Biringanya", cat:"Vegetable", benefits:"Low-calorie vegetable that absorbs flavor well.", caution:"Can absorb a lot of oil when fried."},
+ {keys:["groundnut","gnut","groundnut sauce"], name:"Groundnut Sauce", cat:"Healthy Fat", benefits:"Satisfying sauce with healthy fats and flavor.", caution:"Calorie-dense, so portions matter."},
+ {keys:["chapati"], name:"Chapati", cat:"Carb + Fat", benefits:"Satisfying and pairs with beans, eggs, or vegetables.", caution:"Often oil-heavy; treat as a richer starch."},
+ {keys:["pilau"], name:"Pilau", cat:"Mixed Dish", benefits:"Flavorful rice dish that can be balanced with vegetables and protein.", caution:"Can be oil-heavy and portion-heavy."},
+ {keys:["katogo"], name:"Katogo", cat:"Mixed Dish", benefits:"Traditional mixed meal; can be balanced with beans/meat and vegetables.", caution:"Watch portions and oily sauces depending on ingredients."},
+ {keys:["rolex"], name:"Rolex", cat:"Mixed Dish", benefits:"Egg and chapati combo can be filling and convenient.", caution:"Often oil-heavy; add vegetables and keep it occasional if weight loss is a goal."},
+ {keys:["tilapia","salmon","tuna"], name:"Fish", cat:"Protein", benefits:"High-quality protein; fatty fish adds omega-3 fats.", caution:"Avoid very salty or heavily fried versions."},
+ {keys:["cowpeas","black eyed peas"], name:"Cowpeas", cat:"Protein + Carb", benefits:"Good plant protein and fiber; works well with rice, greens, or plantain.", caution:"Watch added oil and salt in stews."},
+ {keys:["mango","mangoes"], name:"Mango", cat:"Fruit", benefits:"Sweet fruit with vitamin C and fiber.", caution:"Naturally sweet; portion matters in smoothies."},
+ {keys:["pineapple"], name:"Pineapple", cat:"Fruit", benefits:"Bright flavor with vitamin C; works well in small smoothie portions.", caution:"Acidic and sweet; use moderate portions."},
+ {keys:["orange","oranges"], name:"Orange", cat:"Fruit", benefits:"Vitamin C and hydration-friendly fruit.", caution:"Juice is easier to overconsume than whole fruit."},
+ {keys:["garlic"], name:"Garlic", cat:"Flavor", benefits:"Adds strong flavor and can reduce the need for extra salt.", caution:"Can trigger reflux or stomach discomfort for some."},,
+ {keys:["popcorn"], name:"Popcorn", cat:"Snack", benefits:"Light, high-volume snack when air-popped or lightly prepared.", caution:"Watch butter, sugar, and heavy salt."},
+ {keys:["cashew","cashews"], name:"Cashews", cat:"Snack + Healthy Fat", benefits:"Satisfying snack with healthy fats, minerals, and some protein.", caution:"Calorie-dense; a small handful is enough."},
+ {keys:["almond","almonds"], name:"Almonds", cat:"Snack + Healthy Fat", benefits:"Crunchy snack with fiber, healthy fats, and some protein.", caution:"Portion matters; nuts are easy to overeat."},
+ {keys:["walnut","walnuts"], name:"Walnuts", cat:"Snack + Healthy Fat", benefits:"Healthy fat snack with plant omega-3 fats.", caution:"Calorie-dense; keep to a small handful."},
+ {keys:["peanuts","groundnuts"], name:"Peanuts/Groundnuts", cat:"Snack + Healthy Fat", benefits:"Affordable, filling snack with healthy fats and some protein.", caution:"Choose unsalted or lightly salted when possible; portions matter."},
+ {keys:["trail mix"], name:"Trail Mix", cat:"Snack", benefits:"Convenient snack with nuts, fruit, and energy.", caution:"Can become calorie-heavy quickly, especially with candy or lots of dried fruit."},
+ {keys:["granola"], name:"Granola", cat:"Snack", benefits:"Crunchy, convenient topping or snack.", caution:"Often high in sugar and calories; check portions."},
+ {keys:["boiled egg","boiled eggs"], name:"Boiled Eggs", cat:"Snack + Protein", benefits:"Simple protein snack that can help control hunger.", caution:"Watch added salt or mayonnaise-heavy pairings."},
+ {keys:["carrot","carrots"], name:"Carrots", cat:"Snack + Vegetable", benefits:"Crunchy, low-calorie snack with fiber and beta-carotene.", caution:"Very easy snack option; pair with protein/fat if still hungry."},
+ {keys:["cucumber","cucumbers"], name:"Cucumber", cat:"Snack + Vegetable", benefits:"Hydrating, low-calorie snack.", caution:"May not be filling alone; pair with yogurt, eggs, or nuts if needed."},
+ {keys:["dates"], name:"Dates", cat:"Snack + Fruit", benefits:"Naturally sweet and quick energy.", caution:"Very sweet; keep portions small."},
+ {keys:["dried fruit","raisins"], name:"Dried Fruit", cat:"Snack + Fruit", benefits:"Portable sweet snack.", caution:"Concentrated sugar; small portions work best."}
 ];
 
 function $(id){return document.getElementById(id);}
@@ -249,17 +351,23 @@ function today(){
 function getFoods(){return $("foods").value.split("\n").map(x=>x.trim()).filter(Boolean);}
 function findFoodInfo(food){
  const low=food.toLowerCase();
- return foodDB.filter(item=>item.keys.some(k=>low.includes(k)));
+ return allFoodDB().filter(item=>item.keys.some(k=>low.includes(k)));
 }
 function match(txt, words){return new RegExp(words,"i").test(txt);}
 function classify(){
  const foods=getFoods();
+ const custom=readCustomFoods();
+ function customCat(food, cats){
+  const low=food.toLowerCase();
+  return custom.some(c=>c.keys.some(k=>low.includes(k)) && cats.includes(c.cat));
+ }
  return {
   all:foods,
-  protein:foods.filter(x=>match(x,"chicken|liver|fish|egg|eggs|beans|beef|yogurt|lentil|peas|turkey|tofu|pork|goat")),
-  veg:foods.filter(x=>match(x,"veggie|vegetable|spinach|kale|greens|cabbage|pepper|tomato|onion|broccoli|salad|carrot|celery|cucumber")),
-  carb:foods.filter(x=>match(x,"potato|plantain|spaghetti|rice|pasta|yam|cassava|matooke|oat|bread|sweet|posho|millet")),
-  fat:foods.filter(x=>match(x,"peanut|avocado|olive|nuts|cashew|sesame|flax|chia"))
+  protein:foods.filter(x=>match(x,"chicken|liver|fish|tilapia|salmon|tuna|egg|eggs|beans|beef|yogurt|lentil|peas|cowpeas|turkey|tofu|pork|goat|stew") || customCat(x,["Protein","Mixed Dish"])),
+  veg:foods.filter(x=>match(x,"veggie|vegetable|spinach|kale|greens|dodo|amaranth|nakati|sukuma|collard|cabbage|pepper|tomato|onion|broccoli|salad|carrot|celery|cucumber|okra|eggplant|biringanya") || customCat(x,["Vegetable"])),
+  carb:foods.filter(x=>match(x,"potato|plantain|gonja|spaghetti|rice|pasta|yam|cassava|muwogo|matooke|matoke|oat|bread|sweet|posho|ugali|millet|chapati|pilau|katogo|rolex") || customCat(x,["Carb","Mixed Dish"])),
+  fat:foods.filter(x=>match(x,"peanut|avocado|olive|nuts|cashew|sesame|flax|chia|almond|walnut") || customCat(x,["Healthy Fat"])),
+  snack:foods.filter(x=>match(x,"popcorn|peanut|groundnut|cashew|almond|walnut|nuts|fruit|apple|banana|berries|orange|mango|pineapple|yogurt|boiled egg|egg|carrot|cucumber") || custom.some(c=>c.useSnack && c.keys.some(k=>x.toLowerCase().includes(k))))
  };
 }
 function analyzeFoods(){
@@ -268,7 +376,8 @@ function analyzeFoods(){
  <b>Protein:</b> ${badges(c.protein)}<br>
  <b>Vegetables:</b> ${badges(c.veg)}<br>
  <b>Carbs:</b> ${badges(c.carb)}<br>
- <b>Healthy fats/extras:</b> ${badges(c.fat)}
+ <b>Healthy fats/extras:</b> ${badges(c.fat)}<br>
+ <b>Snacks/fruits:</b> ${badges(c.snack)}
  `;
  let seen=new Set(), cards="";
  getFoods().forEach(food=>{
@@ -296,6 +405,24 @@ function updateDynamicTip(c){
  if(c.all.some(x=>/fried/i.test(x))) tip += " Fried foods can fit occasionally, but portions matter.";
  $("dynamicTip").innerHTML=tip;
 }
+
+function generateSnackPlan(c){
+ const snackPool = c.snack.length ? c.snack : [];
+ const fruitPool = c.all.filter(x=>match(x,"apple|banana|berries|orange|mango|pineapple|fruit|dates"));
+ const defaultSnacks = ["Air-popped popcorn", "Small handful of peanuts/groundnuts", "Small handful of cashews", "Plain Greek yogurt", "Boiled egg", "Carrots or cucumber"];
+ const defaultFruits = ["Apple", "Banana", "Orange", "Berries", "Mango slices"];
+ let snacks = snackPool.length ? snackPool : defaultSnacks;
+ let fruits = fruitPool.length ? fruitPool : defaultFruits;
+ let html = "<h3>Snack / fruit options for when hungry</h3>";
+ html += "<table><tr><th>When</th><th>Option</th><th>Piwi note</th></tr>";
+ html += `<tr><td>Light hunger</td><td>${pick(fruits,0,"Fruit")} or ${pick(snacks,0,"Popcorn")}</td><td>Choose something light before hunger becomes intense.</td></tr>`;
+ html += `<tr><td>More hunger</td><td>${pick(snacks,1,"Greek yogurt")} + ${pick(fruits,1,"Fruit")}</td><td>Pair fruit with protein/fat for better fullness.</td></tr>`;
+ html += `<tr><td>Crunch craving</td><td>${pick(snacks,2,"Carrots/cucumber")} or ${pick(snacks,3,"Small handful of nuts")}</td><td>Keep nuts to a small handful because they are calorie-dense.</td></tr>`;
+ html += "</table>";
+ $("snackPlan").innerHTML = html;
+ localStorage.setItem("piwiSnackPlan", html);
+}
+
 function generatePlan(){
  const c=classify(), mode=$("mode").value, n=Number($("daysToPlan").value), mealTime=$("mealTime").value || "Main meal";
  let proteins=c.protein.length?c.protein:["Add protein"];
@@ -323,6 +450,7 @@ function generatePlan(){
  html+="</table>";
  $("plan").innerHTML=html;
  updateDynamicTip(c);
+ generateSnackPlan(c);
  localStorage.setItem("piwiPlan3",html);
  localStorage.setItem("piwiTip3",$("dynamicTip").innerHTML);
 }
@@ -332,13 +460,15 @@ function generateGrocery(){
  <b>Proteins:</b> ${badges(c.protein)}<br>
  <b>Vegetables:</b> ${badges(c.veg)}<br>
  <b>Carbs:</b> ${badges(c.carb)}<br>
- <b>Healthy fats/extras:</b> ${badges(c.fat)}`;
- let additions = {Protein:[], Vegetables:[], Carbs:[], "Healthy fats/extras":[], Fruits:[], Flavor:[]};
+ <b>Healthy fats/extras:</b> ${badges(c.fat)}<br>
+ <b>Snacks/fruits:</b> ${badges(c.snack)}`;
+ let additions = {Protein:[], Vegetables:[], Carbs:[], "Healthy fats/extras":[], "Snacks":[], Fruits:[], Flavor:[]};
  if(c.protein.length<2) additions.Protein.push("Eggs", "Greek yogurt", "Beans", "Fish", "Lentils");
  if(c.veg.length<2) additions.Vegetables.push("Cabbage", "Carrots", "Broccoli", "Cucumber", "Salad greens");
  if(c.carb.length<1) additions.Carbs.push("Sweet potatoes", "Rice", "Plantain", "Oats", "Irish potatoes");
  if(c.fat.length<1) additions["Healthy fats/extras"].push("Ground flaxseed", "Chia seeds", "Avocado", "Olive oil");
- if(!c.all.some(x=>/fruit|apple|banana|berries|orange/i.test(x))) additions.Fruits.push("Green apples", "Berries", "Oranges");
+ if(c.snack.length<2) additions.Snacks.push("Popcorn", "Peanuts/groundnuts", "Cashews", "Boiled eggs", "Carrots", "Cucumber");
+ if(!c.all.some(x=>/fruit|apple|banana|berries|orange|mango|pineapple/i.test(x))) additions.Fruits.push("Green apples", "Berries", "Oranges", "Bananas", "Mango");
  if(!c.all.some(x=>/lemon|ginger/i.test(x))) additions.Flavor.push("Lemon", "Ginger");
  let addHtml="<h3>Recommended additions</h3>";
  Object.keys(additions).forEach(k=>{
@@ -351,55 +481,136 @@ function copyGrocery(){
  const text=$("grocery").innerText;
  navigator.clipboard.writeText(text).then(()=>alert("Grocery list copied."),()=>alert("Copy failed. You can select and copy manually."));
 }
-function readLog(){try{return JSON.parse(localStorage.getItem("piwiLog3")||"{}");}catch(e){return {};}}
-function writeLog(log){localStorage.setItem("piwiLog3",JSON.stringify(log));}
+function toOz(amount, unit){
+ amount = Number(amount || 0);
+ if(!amount) return 0;
+ return unit === "L" ? amount * 33.814 : amount;
+}
+function fromOz(oz, unit){
+ oz = Number(oz || 0);
+ return unit === "L" ? oz / 33.814 : oz;
+}
+function mealQualityScore(x){
+ return ["mealProtein","mealVeg","mealStarch","mealFruit","mealFat"].reduce((sum,k)=>sum+(x[k]?1:0),0);
+}
+function satisfactionValue(s){
+ if(s==="Still hungry") return 1;
+ if(s==="Okay") return 2;
+ if(s==="Satisfied") return 3;
+ if(s==="Too full") return 2;
+ return 0;
+}
+function readLog(){try{return JSON.parse(localStorage.getItem("piwiLog35")||"{}");}catch(e){return {};}}
+function writeLog(log){localStorage.setItem("piwiLog35",JSON.stringify(log));}
 function saveToday(){
+ const waterUnit = $("waterUnit").value;
+ const waterGoalUnit = $("waterGoalUnit").value;
+ const waterOz = toOz($("water").value, waterUnit);
+ const waterGoalOz = toOz($("waterGoal").value, waterGoalUnit);
  const log=readLog();
- log[today()]={smoothie:$("smoothie").checked,flax:$("flax").checked,tea:$("tea").checked,meal:$("meal").checked,water:$("water").value,waterGoal:$("waterGoal").value,weight:$("weight").value,energy:$("energy").value,hunger:$("hunger").value,notes:$("notes").value};
+ log[today()]={
+  meal:$("meal").checked,
+  mealProtein:$("mealProtein").checked,
+  mealVeg:$("mealVeg").checked,
+  mealStarch:$("mealStarch").checked,
+  mealFruit:$("mealFruit").checked,
+  mealFat:$("mealFat").checked,
+  satisfaction:$("satisfaction").value,
+  craving:$("craving").value,
+  movement:$("movement").checked,
+  exerciseType:$("exerciseType").value,
+  exerciseMinutes:$("exerciseMinutes").value,
+  movementLevel:$("movementLevel").value,
+  water:$("water").value,
+  waterUnit:waterUnit,
+  waterOz:waterOz,
+  waterGoal:$("waterGoal").value,
+  waterGoalUnit:waterGoalUnit,
+  waterGoalOz:waterGoalOz,
+  weight:$("weight").value,
+  energy:$("energy").value,
+  hunger:$("hunger").value,
+  notes:$("notes").value
+ };
  writeLog(log); renderLog(); updateDashboard(); alert("Saved today.");
 }
 function renderLog(){
  const log=readLog(), dates=Object.keys(log).sort().reverse();
  if(!dates.length){$("log").innerHTML="No saved entries yet.";return;}
- let html="<table><tr><th>Date</th><th>Smoothie</th><th>Flax</th><th>Tea</th><th>Meal</th><th>Water</th><th>Weight</th><th>Energy</th><th>Hunger</th><th>Notes</th></tr>";
+ let html="<table><tr><th>Date</th><th>Meal</th><th>Quality</th><th>Satisfaction</th><th>Craving</th><th>Movement</th><th>Exercise</th><th>Water</th><th>Weight</th><th>Energy</th><th>Hunger</th><th>Notes</th></tr>";
  dates.forEach(d=>{
   const x=log[d];
-  html+=`<tr><td>${d}</td><td>${x.smoothie?"✅":"—"}</td><td>${x.flax?"✅":"—"}</td><td>${x.tea?"✅":"—"}</td><td>${x.meal?"✅":"—"}</td><td>${x.water||"—"}</td><td>${x.weight||"—"}</td><td>${x.energy||"—"}</td><td>${x.hunger||"—"}</td><td>${x.notes||""}</td></tr>`;
+  const q=mealQualityScore(x);
+  const waterDisplay = x.water ? `${x.water} ${x.waterUnit||"oz"}` : "—";
+  const ex = `${x.exerciseType||"—"}${x.exerciseMinutes? " ("+x.exerciseMinutes+" min)" : ""}${x.movementLevel? " · "+x.movementLevel : ""}`;
+  html+=`<tr><td>${d}</td><td>${x.meal?"✅":"—"}</td><td>${q}/5</td><td>${x.satisfaction||"—"}</td><td>${x.craving||"—"}</td><td>${x.movement?"✅":"—"}</td><td>${ex}</td><td>${waterDisplay}</td><td>${x.weight||"—"}</td><td>${x.energy||"—"}</td><td>${x.hunger||"—"}</td><td>${x.notes||""}</td></tr>`;
  });
  html+="</table>"; $("log").innerHTML=html;
 }
 function updateDashboard(){
  const log=readLog(), dates=Object.keys(log).sort().slice(-7);
- if(!dates.length){$("score").innerText="0%";$("smoothieStreak").innerText="0";$("teaStreak").innerText="0";$("avgWater").innerText="0";$("todayFocus").innerText="Save a daily entry to see your focus here.";return;}
- let points=0,max=dates.length*6,smooth=0,tea=0,waterSum=0,waterCount=0,last=log[dates[dates.length-1]];
+ if(!dates.length){
+  $("score").innerText="0%"; $("movementDays").innerText="0"; $("workoutMinutes").innerText="0"; $("avgWater").innerText="0";
+  $("mealQuality").innerText="0/5"; $("topCraving").innerText="—"; $("avgSatisfaction").innerText="—"; $("waterUnitDash").innerText="oz";
+  $("todayFocus").innerText="Save a daily entry to see your focus here."; return;
+ }
+ let points=0,max=dates.length*9,movementDays=0,totalMinutes=0,waterOzSum=0,waterCount=0,qualitySum=0,qualityCount=0,satSum=0,satCount=0,cravings={},preferredUnit="oz",last=log[dates[dates.length-1]];
  dates.forEach(d=>{
   const x=log[d];
-  if(x.smoothie){points++;smooth++}
-  if(x.flax) points++;
-  if(x.tea){points++;tea++}
+  const moved = x.movement || Number(x.exerciseMinutes)>=10 || (x.exerciseType && x.exerciseType.trim());
+  const q=mealQualityScore(x);
   if(x.meal) points++;
-  if(Number(x.water)>=Number(x.waterGoal||50)) points++;
+  if(q>=3) points++;
+  if(x.satisfaction) points++;
+  if(x.craving) points++;
+  if(moved){points++; movementDays++;}
+  if(Number(x.exerciseMinutes)>0) totalMinutes += Number(x.exerciseMinutes);
+  const wOz = Number(x.waterOz || toOz(x.water, x.waterUnit||"oz"));
+  const gOz = Number(x.waterGoalOz || toOz(x.waterGoal||50, x.waterGoalUnit||"oz"));
+  if(wOz && gOz && wOz>=gOz) points++;
+  if(x.energy) points++;
+  if(x.hunger) points++;
   if(x.notes && x.notes.trim()) points++;
-  if(x.water){waterSum+=Number(x.water);waterCount++}
+  if(wOz){waterOzSum+=wOz; waterCount++; preferredUnit=x.waterUnit||preferredUnit;}
+  if(q){qualitySum+=q; qualityCount++;}
+  const sv=satisfactionValue(x.satisfaction); if(sv){satSum+=sv; satCount++;}
+  if(x.craving && x.craving !== "None") cravings[x.craving]=(cravings[x.craving]||0)+1;
  });
+ const avgWaterOz = waterCount ? waterOzSum/waterCount : 0;
+ const avgWater = preferredUnit==="L" ? (avgWaterOz/33.814).toFixed(1) : Math.round(avgWaterOz);
+ const top = Object.keys(cravings).sort((a,b)=>cravings[b]-cravings[a])[0] || "None";
+ const avgSatNum = satCount ? satSum/satCount : 0;
+ const avgSat = avgSatNum>=2.6 ? "Satisfied" : avgSatNum>=1.8 ? "Okay" : avgSatNum>0 ? "Hungry" : "—";
  $("score").innerText=Math.round(points/max*100)+"%";
- $("smoothieStreak").innerText=smooth;
- $("teaStreak").innerText=tea;
- $("avgWater").innerText=waterCount?Math.round(waterSum/waterCount):0;
- let focus="Keep the routine simple today: water, smoothie/tea, and a balanced main meal.";
- if(last && last.hunger==="Too hungry") focus="You were too hungry before your meal. Consider adding more protein or Greek yogurt/flax to the smoothie.";
- if(last && last.energy==="Low") focus="Energy was low. Check water intake and make sure your main meal has enough protein and starch.";
+ $("movementDays").innerText=movementDays;
+ $("workoutMinutes").innerText=totalMinutes;
+ $("avgWater").innerText=avgWater;
+ $("waterUnitDash").innerText=preferredUnit;
+ $("mealQuality").innerText=qualityCount ? (qualitySum/qualityCount).toFixed(1)+"/5" : "0/5";
+ $("topCraving").innerText=top;
+ $("avgSatisfaction").innerText=avgSat;
+ let focus="Keep the routine simple today: water, a balanced main meal, and a little movement.";
+ if(last){
+  const moved = last.movement || Number(last.exerciseMinutes)>=10 || (last.exerciseType && last.exerciseType.trim());
+  const q=mealQualityScore(last);
+  if(!moved) focus="Try to add a short walk, stretch, yoga, or any movement today. Small movement still counts.";
+  if(q && q<3) focus="Next meal idea: aim for at least protein + vegetables + starch for a stronger balance.";
+  if(last.craving && last.craving !== "None") focus=`Craving noted: ${last.craving}. Plan a smart snack so it doesn't turn into random snacking.`;
+  if(last.hunger==="Too hungry") focus="You were too hungry before your meal. Consider adding more protein, vegetables, or a small planned snack.";
+  if(last.energy==="Low") focus="Energy was low. Check water intake and make sure your main meal has enough protein and starch.";
+ }
  $("todayFocus").innerText=focus;
 }
 function exportCSV(){
  const log=readLog(), dates=Object.keys(log).sort();
  if(!dates.length){alert("No log data to export yet.");return;}
- const headers=["date","smoothie","flax","tea","meal","water","waterGoal","weight","energy","hunger","notes"];
+ const headers=["date","meal","mealProtein","mealVeg","mealStarch","mealFruit","mealFat","mealQuality","satisfaction","craving","movement","exerciseType","exerciseMinutes","movementLevel","water","waterUnit","waterOz","waterGoal","waterGoalUnit","weight","energy","hunger","notes"];
  const rows=[headers.join(",")];
  dates.forEach(d=>{
   const x=log[d];
+  const rowObj={...x,date:d,mealQuality:mealQualityScore(x)};
   rows.push(headers.map(h=>{
-    let val=h==="date"?d:(x[h]??"");
+    let val=rowObj[h]??"";
     val=String(val).replace(/"/g,'""');
     return `"${val}"`;
   }).join(","));
@@ -407,24 +618,148 @@ function exportCSV(){
  const blob=new Blob([rows.join("\n")],{type:"text/csv"});
  const url=URL.createObjectURL(blob);
  const a=document.createElement("a");
- a.href=url; a.download="piwi-meal-planner-log.csv"; a.click(); URL.revokeObjectURL(url);
+ a.href=url; a.download="piwi-meal-planner-log-v35.csv"; a.click(); URL.revokeObjectURL(url);
 }
 function clearLog(){
- if(confirm("Clear all saved daily entries?")){localStorage.removeItem("piwiLog3");renderLog();updateDashboard();}
+ if(confirm("Clear all saved daily entries?")){localStorage.removeItem("piwiLog35");renderLog();updateDashboard();}
 }
 function renderLibrary(){
+ const recipes = [
+  {name:"Green Smoothie", type:"Smoothie", ingredients:"Spinach, celery, green apple, ginger, lemon, ground flaxseed, water/ice.", note:"Use more spinach than celery for smoother texture. Use ½ apple if keeping sugar lower."},
+  {name:"Protein Green Smoothie", type:"Smoothie", ingredients:"Spinach, celery, ½ apple, ginger, flaxseed, ¼ cup plain Greek yogurt, water.", note:"Adds more protein and may keep you fuller before your main meal."},
+  {name:"Chicken + Sweet Potato Plate", type:"Balanced Meal", ingredients:"Roasted chicken, sweet potato, greens or cabbage.", note:"Simple protein + starch + vegetables plate."},
+  {name:"Matooke + Beans", type:"Ugandan Meal", ingredients:"Matooke, beans, tomatoes, onions, greens.", note:"Filling plant-based meal. Keep sauce oil moderate."},
+  {name:"Fish + Posho + Greens", type:"East African Meal", ingredients:"Fish, posho/ugali, sukuma/collard greens, tomato-onion sauce.", note:"Balanced if the fish is grilled, boiled, or lightly cooked."},
+  {name:"Groundnut Vegetable Stew", type:"Ugandan-Inspired", ingredients:"Groundnut sauce, greens, eggplant/okra, beans or fish.", note:"Very satisfying; groundnut sauce is calorie-dense, so portions matter."},
+  {name:"Egg Rolex Bowl", type:"Quick Meal", ingredients:"Eggs, cabbage, tomatoes, onions, small chapati pieces or potatoes.", note:"Rolex flavor with easier portion control."},
+  {name:"Peanut Tomato Spaghetti", type:"Comfort Meal", ingredients:"Spaghetti, peanut butter, tomatoes, onions, green pepper, side greens.", note:"Comforting and filling; pair with vegetables and keep pasta portion moderate."}
+ ];
  let html="";
- foodDB.forEach(info=>{
-  html += `<div class="food-card"><b>${info.name}</b> <span class="tag">${info.cat}</span>
-  <p class="good"><b>Value:</b> ${info.benefits}</p>
-  <p class="care"><b>Note:</b> ${info.caution}</p></div>`;
+ recipes.forEach(r=>{
+  html += `<div class="food-card"><b>${r.name}</b> <span class="tag">${r.type}</span><p><b>Ingredients:</b> ${r.ingredients}</p><p class="care"><b>Piwi note:</b> ${r.note}</p></div>`;
  });
  $("libraryList").innerHTML=html;
 }
+
+function readCustomFoods(){
+ try{return JSON.parse(localStorage.getItem("piwiCustomFoods")||"[]");}catch(e){return [];}
+}
+function writeCustomFoods(items){
+ localStorage.setItem("piwiCustomFoods", JSON.stringify(items));
+}
+function smartFoodSuggestion(name, cat){
+ const n=(name||"").toLowerCase();
+ let benefit="Adds variety to your weekly meals and can fit into a balanced plan.";
+ let caution="Portion and preparation matter, especially if it is fried, sweetened, or salty.";
+ if(cat==="Protein"){benefit="Provides protein to support fullness, muscle, and balanced meals."; caution="Go easy on heavy oil, salt, or creamy sauces.";}
+ if(cat==="Vegetable"){benefit="Adds fiber, volume, vitamins, and minerals with fewer calories."; caution="Watch added oil and salt during cooking.";}
+ if(cat==="Carb"){benefit="Provides energy and helps make meals satisfying."; caution="Balance portions with protein and vegetables.";}
+ if(cat==="Fruit"){benefit="Adds natural sweetness, fiber, vitamins, and hydration."; caution="Whole fruit is usually more filling than juice; portions still matter.";}
+ if(cat==="Snack"){benefit="Can help manage hunger between meals when planned intentionally."; caution="Keep portions moderate so snacks support the plan instead of replacing meals.";}
+ if(cat==="Healthy Fat"){benefit="Adds flavor and satisfaction and can help meals feel fuller."; caution="Healthy fats are calorie-dense, so small portions work best.";}
+ if(cat==="Mixed Dish"){benefit="Can combine protein, carbs, and vegetables in one practical meal."; caution="Balance depends on ingredients; watch oil, salt, and portion size.";}
+ if(cat==="Flavor"){benefit="Adds flavor and can reduce the need for extra salt or sugar."; caution="Use based on tolerance, especially if acidic, spicy, or strong.";}
+
+ if(/fried|chips|mandazi|chapati|samosa|doughnut|donut/.test(n)){
+   benefit="Satisfying comfort food that can fit occasionally when portions are planned.";
+   caution="Often higher in oil or refined carbs; pair with protein/vegetables or keep portions smaller.";
+ }
+ if(/cassava|muwogo|yam|matooke|posho|ugali|rice|pasta|spaghetti|potato/.test(n)){
+   benefit="Filling starch that provides energy and pairs well with protein and vegetables.";
+   caution="Portion matters; avoid making starch the whole plate.";
+ }
+ if(/peanut|groundnut|cashew|almond|nuts|avocado/.test(n)){
+   benefit="Adds healthy fats and satisfaction, with some protein or fiber depending on the food.";
+   caution="Calorie-dense; a small handful or measured portion works best.";
+ }
+ if(/bean|lentil|pea|cowpea/.test(n)){
+   benefit="Good plant protein and fiber that can help fullness and digestion.";
+   caution="Can cause bloating for some people; increase portions gradually.";
+ }
+ if(/smoothie|juice/.test(n)){
+   benefit="Can be a convenient way to add fruits, vegetables, and hydration.";
+   caution="Keep it balanced with fiber/protein and avoid making it too fruit-heavy.";
+ }
+ if(/sweet|cake|cookie|candy|chocolate/.test(n)){
+   benefit="Can satisfy a sweet craving when planned in a small portion.";
+   caution="Often high in sugar; keep portions small and avoid using it as the main snack every day.";
+ }
+ return {benefit,caution};
+}
+function suggestCustomFood(){
+ const name=$("customFoodName").value.trim();
+ const cat=$("customFoodCat").value;
+ if(!name){alert("Enter a food name first."); return;}
+ const s=smartFoodSuggestion(name, cat);
+ $("customFoodBenefit").value=s.benefit;
+ $("customFoodCaution").value=s.caution;
+}
+function saveCustomFood(){
+ const name=$("customFoodName").value.trim();
+ if(!name){alert("Enter a food name."); return;}
+ const item={
+  keys:[name.toLowerCase()],
+  name:name,
+  cat:$("customFoodCat").value,
+  benefits:$("customFoodBenefit").value.trim() || smartFoodSuggestion(name,$("customFoodCat").value).benefit,
+  caution:$("customFoodCaution").value.trim() || smartFoodSuggestion(name,$("customFoodCat").value).caution,
+  useMeal:$("customUseMeal").checked,
+  useSnack:$("customUseSnack").checked
+ };
+ const items=readCustomFoods();
+ const existing=items.findIndex(x=>x.name.toLowerCase()===name.toLowerCase());
+ if(existing>=0) items[existing]=item; else items.push(item);
+ writeCustomFoods(items);
+ renderCustomFoods();
+ alert("Custom food saved.");
+}
+function clearCustomForm(){
+ ["customFoodName","customFoodBenefit","customFoodCaution"].forEach(id=>$(id).value="");
+ $("customFoodCat").value="Protein";
+ $("customUseMeal").checked=true;
+ $("customUseSnack").checked=false;
+}
+function deleteCustomFood(name){
+ const items=readCustomFoods().filter(x=>x.name!==name);
+ writeCustomFoods(items);
+ renderCustomFoods();
+}
+function renderCustomFoods(){
+ const items=readCustomFoods();
+ if(!items.length){$("customFoodList").innerHTML="No custom foods saved yet."; return;}
+ let html="";
+ items.forEach(x=>{
+  html += `<div class="food-card"><b>${x.name}</b> <span class="tag">${x.cat}</span>
+  <p class="good"><b>Value:</b> ${x.benefits}</p>
+  <p class="care"><b>Note:</b> ${x.caution}</p>
+  <p class="small">Meal planning: ${x.useMeal?"Yes":"No"} · Snack option: ${x.useSnack?"Yes":"No"}</p>
+  <button class="danger" onclick="deleteCustomFood('${x.name.replace(/'/g,"\\'")}')">Delete</button></div>`;
+ });
+ $("customFoodList").innerHTML=html;
+}
+function exportCustomFoods(){
+ const items=readCustomFoods();
+ if(!items.length){alert("No custom foods to export."); return;}
+ const blob=new Blob([JSON.stringify(items,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement("a");
+ a.href=url; a.download="piwi-custom-foods.json"; a.click(); URL.revokeObjectURL(url);
+}
+function clearCustomFoods(){
+ if(confirm("Clear all custom foods?")){
+  localStorage.removeItem("piwiCustomFoods");
+  renderCustomFoods();
+ }
+}
+function allFoodDB(){
+ return foodDB.concat(readCustomFoods());
+}
+
 window.addEventListener("load",()=>{
  const f=localStorage.getItem("piwiFoods3"); if(f) $("foods").value=f;
  const p=localStorage.getItem("piwiPlan3"); if(p) $("plan").innerHTML=p;
  const t=localStorage.getItem("piwiTip3"); if(t) $("dynamicTip").innerHTML=t;
+ const sp=localStorage.getItem("piwiSnackPlan"); if(sp && $("snackPlan")) $("snackPlan").innerHTML=sp;
  $("analyzeBtn").addEventListener("click",analyzeFoods);
  $("saveFoodsBtn").addEventListener("click",()=>{localStorage.setItem("piwiFoods3",$("foods").value);alert("Foods saved.");});
  $("generateBtn").addEventListener("click",generatePlan);
@@ -433,7 +768,12 @@ window.addEventListener("load",()=>{
  $("saveBtn").addEventListener("click",saveToday);
  $("clearBtn").addEventListener("click",clearLog);
  $("exportBtn").addEventListener("click",exportCSV);
- renderLog(); updateDashboard(); renderLibrary();
+ if($("suggestFoodBtn")) $("suggestFoodBtn").addEventListener("click",suggestCustomFood);
+ if($("saveCustomFoodBtn")) $("saveCustomFoodBtn").addEventListener("click",saveCustomFood);
+ if($("clearCustomFormBtn")) $("clearCustomFormBtn").addEventListener("click",clearCustomForm);
+ if($("exportCustomFoodsBtn")) $("exportCustomFoodsBtn").addEventListener("click",exportCustomFoods);
+ if($("clearCustomFoodsBtn")) $("clearCustomFoodsBtn").addEventListener("click",clearCustomFoods);
+ renderLog(); updateDashboard(); renderLibrary(); renderCustomFoods();
 });
 </script>
 </body>
