@@ -70,11 +70,9 @@ footer{text-align:center;color:var(--muted);padding:22px;font-size:13px}
 <nav class="no-print">
   <button class="active" onclick="showPage('dashboard', this)">Dashboard</button>
   <button onclick="showPage('foodsPage', this)">Foods</button>
-  <button onclick="showPage('customFoodPage', this)">Custom Food</button>
   <button onclick="showPage('plannerPage', this)">Meal Plan</button>
   <button onclick="showPage('groceryPage', this)">Grocery</button>
   <button onclick="showPage('trackerPage', this)">Daily Tracker</button>
-  <button onclick="showPage('recipesPage', this)">Recipes</button>
 </nav>
 
 <section id="dashboard" class="page active">
@@ -108,6 +106,7 @@ footer{text-align:center;color:var(--muted);padding:22px;font-size:13px}
     <section class="card">
       <h2>Foods available this week</h2>
       <p class="small">Enter one food per line. Use normal names like chicken, beans, matooke, spinach, rice, avocado, popcorn, peanuts, cashews, mango, or apples.</p>
+      <p class="small"><b id="foodCount">0 foods entered</b></p>
       <textarea id="foods">Roasted chicken
 Veggie mix spinach kale
 Sweet potatoes
@@ -115,11 +114,13 @@ Plantain
 Irish potatoes
 Spaghetti with peanut butter tomatoes onion green pepper</textarea>
       <button id="analyzeBtn">Analyze Foods</button>
+      <button id="toggleCustomFoodBtnTop" class="secondary">➕ Add Custom Food</button>
       <button id="saveFoodsBtn" class="secondary">Save Foods</button>
     </section>
     <section class="card">
       <h2>Detected categories</h2>
       <div id="categories">Tap <b>Analyze Foods</b>.</div>
+      <div id="unknownFoods" class="info" style="display:none;margin-top:10px"></div>
     </section>
   </div>
   <section class="card">
@@ -127,55 +128,56 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
     <p class="small">Brief benefits and cautions appear only for foods you enter. This is general nutrition guidance, not medical advice.</p>
     <div id="foodValues">Tap <b>Analyze Foods</b>.</div>
   </section>
+
+  <section class="card">
+    <h2>Custom foods</h2>
+    <p class="small">Use this when Piwi does not recognize a food. Add it once, then Piwi can use it in analysis, snacks, and meal planning.</p>
+    <button id="toggleCustomFoodBtn" class="secondary">Open Custom Food Builder</button>
+    <div id="customFoodPanel" style="display:none;margin-top:10px">
+      <div class="grid">
+        <section class="card">
+          <h2>Smart Assisted Custom Food Builder</h2>
+          <label>Food name</label>
+          <input id="customFoodName" placeholder="e.g. cassava chips, mandazi, turkey stew">
+
+          <label>Category</label>
+          <select id="customFoodCat">
+            <option>Protein</option>
+            <option>Vegetable</option>
+            <option>Carb</option>
+            <option>Fruit</option>
+            <option>Snack</option>
+            <option>Healthy Fat</option>
+            <option>Mixed Dish</option>
+            <option>Flavor</option>
+          </select>
+
+          <button id="suggestFoodBtn">Suggest Benefit + Note</button>
+
+          <label>Benefit / value</label>
+          <textarea id="customFoodBenefit" placeholder="Short benefit..."></textarea>
+
+          <label>Note / caution</label>
+          <textarea id="customFoodCaution" placeholder="Short note..."></textarea>
+
+          <label><input type="checkbox" id="customUseMeal" checked> Use in meal planning</label>
+          <label><input type="checkbox" id="customUseSnack"> Use as snack/fruit option</label>
+
+          <button id="saveCustomFoodBtn">Save Custom Food</button>
+          <button id="clearCustomFormBtn" class="secondary">Clear Form</button>
+        </section>
+
+        <section class="card">
+          <h2>Saved custom foods</h2>
+          <div id="customFoodList">No custom foods saved yet.</div>
+          <button id="exportCustomFoodsBtn" class="secondary">Export Custom Foods</button>
+          <button id="clearCustomFoodsBtn" class="danger">Clear Custom Foods</button>
+        </section>
+      </div>
+    </div>
+  </section>
+
 </section>
-
-
-<section id="customFoodPage" class="page">
-  <div class="grid">
-    <section class="card">
-      <h2>Smart Assisted Custom Food Builder</h2>
-      <p class="small">Add foods Piwi does not know yet. The smart suggestion gives you a starter benefit/note that you can edit.</p>
-
-      <label>Food name</label>
-      <input id="customFoodName" placeholder="e.g. cassava chips, mandazi, turkey stew">
-
-      <label>Category</label>
-      <select id="customFoodCat">
-        <option>Protein</option>
-        <option>Vegetable</option>
-        <option>Carb</option>
-        <option>Fruit</option>
-        <option>Snack</option>
-        <option>Healthy Fat</option>
-        <option>Mixed Dish</option>
-        <option>Flavor</option>
-      </select>
-
-      <button id="suggestFoodBtn">Suggest Benefit + Note</button>
-
-      <label>Benefit / value</label>
-      <textarea id="customFoodBenefit" placeholder="Short benefit..."></textarea>
-
-      <label>Note / caution</label>
-      <textarea id="customFoodCaution" placeholder="Short note..."></textarea>
-
-      <label><input type="checkbox" id="customUseMeal" checked> Use in meal planning</label>
-      <label><input type="checkbox" id="customUseSnack"> Use as snack/fruit option</label>
-
-      <button id="saveCustomFoodBtn">Save Custom Food</button>
-      <button id="clearCustomFormBtn" class="secondary">Clear Form</button>
-    </section>
-
-    <section class="card">
-      <h2>Saved custom foods</h2>
-      <p class="small">These save on this device and appear in food analysis, grocery categories, and planning.</p>
-      <div id="customFoodList">No custom foods saved yet.</div>
-      <button id="exportCustomFoodsBtn" class="secondary">Export Custom Foods</button>
-      <button id="clearCustomFoodsBtn" class="danger">Clear Custom Foods</button>
-    </section>
-  </div>
-</section>
-
 <section id="plannerPage" class="page">
   <div class="card">
     <h2>Meal plan settings</h2>
@@ -189,6 +191,11 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
   </div>
   <section class="card">
     <h2>Meal plan</h2>
+    
+    <div id="smoothiePlan" class="info" style="margin-bottom:10px">
+      Tap <b>Generate Meal Plan</b> to see morning water + smoothie options.
+    </div>
+
     <div id="plan">Tap <b>Generate Meal Plan</b>.</div>
     <div id="snackPlan" class="info" style="margin-top:10px">Snacks and fruits will appear here after generating a meal plan.</div>
     <div id="dynamicTip" class="tip"><b>Plate guide:</b> Aim for ½ vegetables, ¼ protein, ¼ starch. Keep meals simple and realistic.</div>
@@ -260,18 +267,9 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
     <div id="log">No saved entries yet.</div>
   </section>
 </section>
-
-<section id="recipesPage" class="page">
-  <section class="card">
-    <h2>Recipes</h2>
-    <p class="small">Simple recipe ideas. Food benefits now appear in the Foods tab when you analyze weekly foods.</p>
-    <div id="libraryList"></div>
-  </section>
-</section>
-
 </main>
 
-<footer>Piwi Meal Planner v3.6<br><em>Simple planning. Better eating.</em></footer>
+<footer>Piwi Meal Planner v3.8<br><em>Simple planning. Better eating.</em></footer>
 
 <script>
 const foodDB = [
@@ -371,6 +369,7 @@ function classify(){
  };
 }
 function analyzeFoods(){
+ updateFoodCount();
  const c=classify();
  $("categories").innerHTML = `
  <b>Protein:</b> ${badges(c.protein)}<br>
@@ -395,6 +394,7 @@ function analyzeFoods(){
  });
  $("foodValues").innerHTML = cards || "Add foods first.";
  localStorage.setItem("piwiFoods3",$("foods").value);
+ showUnknownFoods();
 }
 function badges(arr){return arr.length?arr.map(x=>`<span class='badge'>${x}</span>`).join(""):"—";}
 function pick(arr,i,fallback){return arr.length?arr[i%arr.length]:fallback;}
@@ -423,6 +423,50 @@ function generateSnackPlan(c){
  localStorage.setItem("piwiSnackPlan", html);
 }
 
+
+function generateSmoothiePlan(c){
+ const foods=c.all.map(x=>x.toLowerCase());
+ function hasAny(words){return foods.some(f=>words.some(w=>f.includes(w)));}
+ const greens=[];
+ if(hasAny(["spinach"])) greens.push("spinach");
+ if(hasAny(["kale"])) greens.push("kale");
+ if(hasAny(["celery"])) greens.push("celery");
+ if(hasAny(["cucumber"])) greens.push("cucumber");
+ const fruits=[];
+ if(hasAny(["apple"])) fruits.push("green apple");
+ if(hasAny(["banana"])) fruits.push("banana");
+ if(hasAny(["berries","berry"])) fruits.push("berries");
+ if(hasAny(["mango"])) fruits.push("mango");
+ if(hasAny(["pineapple"])) fruits.push("pineapple");
+ const boosters=[];
+ if(hasAny(["ginger"])) boosters.push("ginger");
+ if(hasAny(["lemon"])) boosters.push("lemon");
+ if(hasAny(["flax"])) boosters.push("ground flaxseed");
+ if(hasAny(["chia"])) boosters.push("chia seeds");
+ if(hasAny(["yogurt"])) boosters.push("plain Greek yogurt");
+
+ const g1=greens[0]||"spinach";
+ const g2=greens[1]||"celery or cucumber";
+ const f1=fruits[0]||"½ green apple";
+ const b1=boosters[0]||"ginger or lemon";
+ const b2=boosters[1]||"ground flaxseed or Greek yogurt";
+
+ let html="<h3>Morning start</h3>";
+ html+="<p><b>Start your day with a glass of water.</b> Then choose one smoothie option based on what you have. Repeat any option as needed.</p>";
+ html+="<table><tr><th>Option</th><th>Smoothie idea</th><th>Piwi note</th></tr>";
+ html+=`<tr><td>Option 1</td><td>${g1} + ${g2} + ${f1} + water/ice</td><td>Simple green base.</td></tr>`;
+ html+=`<tr><td>Option 2</td><td>${g1} + ${f1} + ${b1} + water/ice</td><td>Fresh flavor without making it too heavy.</td></tr>`;
+ html+=`<tr><td>Option 3</td><td>${g1} + ${g2} + ${f1} + ${b2} + water/ice</td><td>More filling if you need it to hold you until the main meal.</td></tr>`;
+ html+="</table>";
+ $("smoothiePlan").innerHTML=html;
+ localStorage.setItem("piwiSmoothiePlan", html);
+}
+function toggleCustomFoodPanel(){
+ const panel=$("customFoodPanel");
+ if(!panel) return;
+ panel.style.display = panel.style.display==="none" ? "block" : "none";
+}
+
 function generatePlan(){
  const c=classify(), mode=$("mode").value, n=Number($("daysToPlan").value), mealTime=$("mealTime").value || "Main meal";
  let proteins=c.protein.length?c.protein:["Add protein"];
@@ -449,6 +493,7 @@ function generatePlan(){
  }
  html+="</table>";
  $("plan").innerHTML=html;
+ generateSmoothiePlan(c);
  updateDynamicTip(c);
  generateSnackPlan(c);
  localStorage.setItem("piwiPlan3",html);
@@ -624,6 +669,7 @@ function clearLog(){
  if(confirm("Clear all saved daily entries?")){localStorage.removeItem("piwiLog35");renderLog();updateDashboard();}
 }
 function renderLibrary(){
+ if(!$("libraryList")) return;
  const recipes = [
   {name:"Green Smoothie", type:"Smoothie", ingredients:"Spinach, celery, green apple, ginger, lemon, ground flaxseed, water/ice.", note:"Use more spinach than celery for smoother texture. Use ½ apple if keeping sugar lower."},
   {name:"Protein Green Smoothie", type:"Smoothie", ingredients:"Spinach, celery, ½ apple, ginger, flaxseed, ¼ cup plain Greek yogurt, water.", note:"Adds more protein and may keep you fuller before your main meal."},
@@ -639,6 +685,58 @@ function renderLibrary(){
   html += `<div class="food-card"><b>${r.name}</b> <span class="tag">${r.type}</span><p><b>Ingredients:</b> ${r.ingredients}</p><p class="care"><b>Piwi note:</b> ${r.note}</p></div>`;
  });
  $("libraryList").innerHTML=html;
+}
+
+
+function updateFoodCount(){
+ const el=$("foodCount");
+ if(!el) return;
+ const count=getFoods().length;
+ el.innerText = count + (count===1 ? " food entered" : " foods entered");
+}
+function isKnownFoodName(food){
+ const low=food.toLowerCase();
+ return allFoodDB().some(item=>item.keys.some(k=>low.includes(k)));
+}
+function getUnknownFoods(){
+ return getFoods().filter(f=>!isKnownFoodName(f));
+}
+function showUnknownFoods(){
+ const box=$("unknownFoods");
+ if(!box) return;
+ const unknown=getUnknownFoods();
+ if(!unknown.length){
+  box.style.display="none";
+  box.innerHTML="";
+  return;
+ }
+ box.style.display="block";
+ let html="<b>⚠️ Piwi does not know these yet:</b><br>";
+ unknown.forEach(food=>{
+  const safe=food.replace(/"/g,'&quot;').replace(/'/g,"&#39;");
+  html += `<span class="badge">${food}</span> <button class="secondary" onclick="prefillCustomFood('${safe}')">Add to Piwi</button><br>`;
+ });
+ box.innerHTML=html;
+}
+function openCustomFoodPanel(){
+ const panel=$("customFoodPanel");
+ if(panel) panel.style.display="block";
+ const btn=$("toggleCustomFoodBtn");
+ if(btn) btn.scrollIntoView({behavior:"smooth", block:"center"});
+}
+function prefillCustomFood(food){
+ openCustomFoodPanel();
+ if($("customFoodName")) $("customFoodName").value=food;
+ if($("customFoodCat")) {
+   const f=food.toLowerCase();
+   if(/popcorn|nut|cashew|peanut|groundnut|mandazi|chips|snack|dates/.test(f)) $("customFoodCat").value="Snack";
+   else if(/rice|potato|matooke|cassava|chapati|bread|pasta|spaghetti|posho|ugali|yam|plantain/.test(f)) $("customFoodCat").value="Carb";
+   else if(/chicken|fish|beef|egg|beans|lentil|goat|pork|turkey/.test(f)) $("customFoodCat").value="Protein";
+   else if(/apple|banana|mango|orange|berry|berries|pineapple|fruit/.test(f)) $("customFoodCat").value="Fruit";
+   else if(/spinach|kale|cabbage|greens|vegetable|tomato|onion|pepper|carrot/.test(f)) $("customFoodCat").value="Vegetable";
+   else $("customFoodCat").value="Mixed Dish";
+ }
+ suggestCustomFood();
 }
 
 function readCustomFoods(){
@@ -711,6 +809,8 @@ function saveCustomFood(){
  if(existing>=0) items[existing]=item; else items.push(item);
  writeCustomFoods(items);
  renderCustomFoods();
+ updateFoodCount();
+ showUnknownFoods();
  alert("Custom food saved.");
 }
 function clearCustomForm(){
@@ -760,6 +860,7 @@ window.addEventListener("load",()=>{
  const p=localStorage.getItem("piwiPlan3"); if(p) $("plan").innerHTML=p;
  const t=localStorage.getItem("piwiTip3"); if(t) $("dynamicTip").innerHTML=t;
  const sp=localStorage.getItem("piwiSnackPlan"); if(sp && $("snackPlan")) $("snackPlan").innerHTML=sp;
+ const smp=localStorage.getItem("piwiSmoothiePlan"); if(smp && $("smoothiePlan")) $("smoothiePlan").innerHTML=smp;
  $("analyzeBtn").addEventListener("click",analyzeFoods);
  $("saveFoodsBtn").addEventListener("click",()=>{localStorage.setItem("piwiFoods3",$("foods").value);alert("Foods saved.");});
  $("generateBtn").addEventListener("click",generatePlan);
@@ -768,12 +869,15 @@ window.addEventListener("load",()=>{
  $("saveBtn").addEventListener("click",saveToday);
  $("clearBtn").addEventListener("click",clearLog);
  $("exportBtn").addEventListener("click",exportCSV);
+ if($("toggleCustomFoodBtn")) $("toggleCustomFoodBtn").addEventListener("click",toggleCustomFoodPanel);
+ if($("toggleCustomFoodBtnTop")) $("toggleCustomFoodBtnTop").addEventListener("click",openCustomFoodPanel);
+ if($("foods")) $("foods").addEventListener("input",updateFoodCount);
  if($("suggestFoodBtn")) $("suggestFoodBtn").addEventListener("click",suggestCustomFood);
  if($("saveCustomFoodBtn")) $("saveCustomFoodBtn").addEventListener("click",saveCustomFood);
  if($("clearCustomFormBtn")) $("clearCustomFormBtn").addEventListener("click",clearCustomForm);
  if($("exportCustomFoodsBtn")) $("exportCustomFoodsBtn").addEventListener("click",exportCustomFoods);
  if($("clearCustomFoodsBtn")) $("clearCustomFoodsBtn").addEventListener("click",clearCustomFoods);
- renderLog(); updateDashboard(); renderLibrary(); renderCustomFoods();
+ renderLog(); updateDashboard(); renderLibrary(); renderCustomFoods(); updateFoodCount(); showUnknownFoods();
 });
 </script>
 </body>
