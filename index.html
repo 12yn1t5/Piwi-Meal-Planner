@@ -53,6 +53,13 @@ footer{text-align:center;color:var(--muted);padding:22px;font-size:13px}
 .good{color:#247345}.care{color:#8a5a00}.limit{color:#8a3a3a}
 @media(max-width:820px){.grid,.stats,.row{grid-template-columns:1fr}h1{font-size:22px}th,td{font-size:13px;padding:7px}.head-inner{align-items:flex-start}}
 @media print{nav,button,.no-print,header{display:none}.page{display:block}.card{box-shadow:none;break-inside:avoid}body{background:white}}
+
+.kitchen-balance{background:var(--blue);border:1px solid #cbdcf7;border-radius:12px;padding:10px;margin-bottom:10px}
+.balance-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.balance-item{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.collapse-header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+@media(max-width:820px){.balance-grid{grid-template-columns:1fr 1fr}}
+
 </style>
 </head>
 <body>
@@ -119,14 +126,15 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
     </section>
     <section class="card">
       <h2>Detected categories</h2>
+      <div id="kitchenBalance" class="kitchen-balance">Analyze foods to see kitchen balance.</div>
       <div id="categories">Tap <b>Analyze Foods</b>.</div>
       <div id="unknownFoods" class="info" style="display:none;margin-top:10px"></div>
     </section>
   </div>
   <section class="card">
-    <h2>Food value cards</h2>
+    <div class="collapse-header"><h2>Food Knowledge</h2><button id="toggleFoodValuesBtn" class="secondary">Show / Hide</button></div>
     <p class="small">Brief benefits and cautions appear only for foods you enter. This is general nutrition guidance, not medical advice.</p>
-    <div id="foodValues">Tap <b>Analyze Foods</b>.</div>
+    <div id="foodValues" style="display:none">Tap <b>Analyze Foods</b>.</div>
   </section>
 
   <section class="card">
@@ -269,7 +277,7 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
 </section>
 </main>
 
-<footer>Piwi Meal Planner v3.8<br><em>Simple planning. Better eating.</em></footer>
+<footer>Piwi Meal Planner v4.0 Intelligence<br><em>Simple planning. Better eating.</em></footer>
 
 <script>
 const foodDB = [
@@ -320,7 +328,54 @@ const foodDB = [
  {keys:["mango","mangoes"], name:"Mango", cat:"Fruit", benefits:"Sweet fruit with vitamin C and fiber.", caution:"Naturally sweet; portion matters in smoothies."},
  {keys:["pineapple"], name:"Pineapple", cat:"Fruit", benefits:"Bright flavor with vitamin C; works well in small smoothie portions.", caution:"Acidic and sweet; use moderate portions."},
  {keys:["orange","oranges"], name:"Orange", cat:"Fruit", benefits:"Vitamin C and hydration-friendly fruit.", caution:"Juice is easier to overconsume than whole fruit."},
- {keys:["garlic"], name:"Garlic", cat:"Flavor", benefits:"Adds strong flavor and can reduce the need for extra salt.", caution:"Can trigger reflux or stomach discomfort for some."},,
+ {keys:["garlic"], name:"Garlic", cat:"Flavor", benefits:"Adds strong flavor and can reduce the need for extra salt.", caution:"Can trigger reflux or stomach discomfort for some."},
+
+ {keys:["milk","whole milk","2% milk","skim milk"], name:"Milk", cat:"Dairy + Protein", benefits:"Provides protein, calcium, vitamin B12, and hydration; useful for smoothies and simple meals.", caution:"Flavored milk can contain added sugar; choose lactose-free if milk bothers your stomach."},
+ {keys:["cottage cheese"], name:"Cottage Cheese", cat:"Protein + Dairy", benefits:"High-protein dairy option that can work as a snack or smoothie side.", caution:"Can be salty depending on brand; check sodium if blood pressure is a focus."},
+ {keys:["cheese","cheddar","mozzarella"], name:"Cheese", cat:"Dairy + Fat", benefits:"Adds protein, calcium, flavor, and satisfaction to meals.", caution:"Often calorie-dense and salty; use as an addition, not the whole meal."},
+ {keys:["kefir"], name:"Kefir", cat:"Dairy + Protein", benefits:"Fermented dairy drink with protein and probiotics; can support smoothies.", caution:"Choose plain versions to avoid added sugar."},
+ {keys:["strawberry","strawberries"], name:"Strawberries", cat:"Fruit", benefits:"Lower-calorie fruit with vitamin C, fiber, and antioxidants; great for smoothies or snacks.", caution:"Sweetened or syrup-packed versions add sugar."},
+ {keys:["blueberry","blueberries"], name:"Blueberries", cat:"Fruit", benefits:"Antioxidant-rich berries with fiber; excellent for smoothies, yogurt, or snacks.", caution:"Dried blueberries are more sugar-dense than fresh or frozen."},
+ {keys:["blackberry","blackberries"], name:"Blackberries", cat:"Fruit", benefits:"High-fiber berries with antioxidants; good snack and smoothie option.", caution:"Dried or sweetened versions can add sugar quickly."},
+ {keys:["raspberry","raspberries"], name:"Raspberries", cat:"Fruit", benefits:"Very fiber-rich berries; useful for snacks, yogurt, and smoothies.", caution:"Can be tart; avoid adding too much sugar."},
+ {keys:["grapes"], name:"Grapes", cat:"Fruit", benefits:"Hydrating fruit that works well as a quick snack.", caution:"Easy to overeat; portion into a small bowl."},
+ {keys:["pear","pears"], name:"Pears", cat:"Fruit", benefits:"Fiber-rich fruit that can help fullness and digestion.", caution:"Juiced or canned syrup versions are less filling."},
+ {keys:["kiwi","kiwis"], name:"Kiwi", cat:"Fruit", benefits:"Vitamin C-rich fruit with fiber; adds variety to snacks.", caution:"Can be acidic for some people."},
+ {keys:["watermelon"], name:"Watermelon", cat:"Fruit", benefits:"Hydrating fruit with natural sweetness; good lighter snack.", caution:"Less filling alone; pair with protein if hungry."},
+ {keys:["papaya"], name:"Papaya", cat:"Fruit", benefits:"Vitamin-rich fruit with fiber and natural sweetness.", caution:"Portion matters in large fruit bowls."},
+ {keys:["passion fruit","passionfruit"], name:"Passion Fruit", cat:"Fruit", benefits:"Flavorful fruit with fiber and vitamin C; adds variety.", caution:"Often sweetened when served as juice."},
+ {keys:["peach","peaches"], name:"Peaches", cat:"Fruit", benefits:"Hydrating fruit with fiber and natural sweetness.", caution:"Canned syrup versions add sugar."},
+ {keys:["plum","plums"], name:"Plums", cat:"Fruit", benefits:"Fiber-containing fruit that works well as a snack.", caution:"Dried plums/prunes are more concentrated."},
+ {keys:["tangerine","tangerines","mandarin","mandarins"], name:"Tangerines/Mandarins", cat:"Fruit", benefits:"Easy vitamin C fruit and portable snack.", caution:"Juice is easier to overconsume than whole fruit."},
+ {keys:["broccoli"], name:"Broccoli", cat:"Vegetable", benefits:"Fiber-rich cruciferous vegetable with vitamin C and volume for balanced meals.", caution:"Can cause gas for some people."},
+ {keys:["cauliflower"], name:"Cauliflower", cat:"Vegetable", benefits:"Low-calorie vegetable that can replace or stretch starches.", caution:"Can cause bloating for some."},
+ {keys:["zucchini"], name:"Zucchini", cat:"Vegetable", benefits:"Light vegetable that adds volume to meals and blends well into stir-fries.", caution:"Can become watery if overcooked."},
+ {keys:["lettuce","romaine"], name:"Lettuce/Romaine", cat:"Vegetable", benefits:"Adds crunch, hydration, and volume with few calories.", caution:"Not very filling alone; pair with protein."},
+ {keys:["green beans"], name:"Green Beans", cat:"Vegetable", benefits:"Fiber-containing vegetable that pairs well with protein and starch.", caution:"Watch heavy butter or salty seasoning."},
+ {keys:["brussels sprouts"], name:"Brussels Sprouts", cat:"Vegetable", benefits:"Fiber-rich vegetable with strong nutrient density.", caution:"Can cause gas; roasting improves flavor."},
+ {keys:["beetroot","beets"], name:"Beetroot", cat:"Vegetable", benefits:"Colorful vegetable with fiber and natural nitrates; adds variety.", caution:"Can be sweet; watch pickled versions high in sodium."},
+ {keys:["beet greens"], name:"Beet Greens", cat:"Vegetable", benefits:"Leafy greens with minerals and fiber.", caution:"Cook lightly and watch added oil/salt."},
+ {keys:["mushroom","mushrooms"], name:"Mushrooms", cat:"Vegetable", benefits:"Savory, low-calorie food that adds texture and umami.", caution:"Can absorb lots of oil when fried."},
+ {keys:["asparagus"], name:"Asparagus", cat:"Vegetable", benefits:"Fiber-containing vegetable that pairs well with protein.", caution:"Can be pricey or seasonal."},
+ {keys:["shrimp","prawns"], name:"Shrimp/Prawns", cat:"Protein", benefits:"Lean protein that cooks quickly and works in salads, rice dishes, or stews.", caution:"Watch salty seasonings and fried versions."},
+ {keys:["turkey"], name:"Turkey", cat:"Protein", benefits:"Lean protein option that can replace chicken or beef.", caution:"Processed turkey can be high in sodium."},
+ {keys:["tofu"], name:"Tofu", cat:"Protein", benefits:"Plant-based protein that absorbs flavor well.", caution:"Needs seasoning; fried tofu adds oil."},
+ {keys:["chickpeas","garbanzo"], name:"Chickpeas", cat:"Protein + Carb", benefits:"Fiber and plant protein; good for salads, stews, or bowls.", caution:"Can cause bloating; rinse canned chickpeas to reduce sodium."},
+ {keys:["black beans"], name:"Black Beans", cat:"Protein + Carb", benefits:"Fiber-rich plant protein that pairs well with rice, vegetables, or bowls.", caution:"Canned versions can be salty unless rinsed."},
+ {keys:["kidney beans"], name:"Kidney Beans", cat:"Protein + Carb", benefits:"Filling bean option with fiber and plant protein.", caution:"Must be cooked properly; rinse canned versions."},
+ {keys:["pinto beans"], name:"Pinto Beans", cat:"Protein + Carb", benefits:"Budget-friendly fiber and plant protein.", caution:"Watch added salt or fatty cooking additions."},
+ {keys:["sardines"], name:"Sardines", cat:"Protein", benefits:"Protein-rich fish with omega-3 fats and calcium when bones are eaten.", caution:"Can be salty; choose lower-sodium when possible."},
+ {keys:["quinoa"], name:"Quinoa", cat:"Carb + Protein", benefits:"Starchy grain-like food with some complete protein and fiber.", caution:"Still counts as a starch; portion matters."},
+ {keys:["oatmeal","oats"], name:"Oats/Oatmeal", cat:"Carb", benefits:"High-fiber breakfast option that can support fullness.", caution:"Watch sugar-heavy toppings."},
+ {keys:["malakwang"], name:"Malakwang", cat:"Vegetable", benefits:"Traditional leafy green dish that adds fiber and cultural variety.", caution:"Sauces can add fat or salt depending on preparation."},
+ {keys:["nsenene"], name:"Nsenene", cat:"Protein", benefits:"Traditional protein-rich food with cultural value and satiety.", caution:"Fried or heavily salted preparations add calories and sodium."},
+ {keys:["luwombo","luwombo chicken","luwombo beef","luwombo groundnut"], name:"Luwombo", cat:"Mixed Dish", benefits:"Traditional steamed dish that can combine protein, vegetables, and rich flavor.", caution:"Balance depends on sauce, oil, and portion size."},
+ {keys:["eshabwe"], name:"Eshabwe", cat:"Dairy + Fat", benefits:"Traditional dairy-based sauce that adds richness and cultural flavor.", caution:"Can be high in fat and salt depending on preparation."},
+ {keys:["kalo","millet bread"], name:"Kalo/Millet Bread", cat:"Carb", benefits:"Traditional millet-based staple that pairs well with protein and vegetables.", caution:"Portion matters as with other starches."},
+ {keys:["simsim","sesame"], name:"Simsim/Sesame", cat:"Healthy Fat", benefits:"Adds healthy fats, minerals, and flavor to meals or snacks.", caution:"Calorie-dense; small amounts go a long way."},
+ {keys:["millet porridge"], name:"Millet Porridge", cat:"Carb", benefits:"Warm traditional breakfast/starch option that can be filling.", caution:"Watch added sugar."},
+ {keys:["mukene","silver fish"], name:"Mukene/Silver Fish", cat:"Protein", benefits:"Protein-rich small fish often used in Ugandan meals.", caution:"Can be salty; preparation matters."},
+ {keys:["smoked fish"], name:"Smoked Fish", cat:"Protein", benefits:"Flavorful protein source that pairs with stews, greens, and staples.", caution:"Can be high in sodium; use moderate portions."},
  {keys:["popcorn"], name:"Popcorn", cat:"Snack", benefits:"Light, high-volume snack when air-popped or lightly prepared.", caution:"Watch butter, sugar, and heavy salt."},
  {keys:["cashew","cashews"], name:"Cashews", cat:"Snack + Healthy Fat", benefits:"Satisfying snack with healthy fats, minerals, and some protein.", caution:"Calorie-dense; a small handful is enough."},
  {keys:["almond","almonds"], name:"Almonds", cat:"Snack + Healthy Fat", benefits:"Crunchy snack with fiber, healthy fats, and some protein.", caution:"Portion matters; nuts are easy to overeat."},
@@ -336,6 +391,13 @@ const foodDB = [
 ];
 
 function $(id){return document.getElementById(id);}
+
+function toggleFoodValues(){
+ const box=$("foodValues");
+ if(!box) return;
+ box.style.display = box.style.display==="none" ? "block" : "none";
+}
+
 function showPage(id, btn){
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  document.getElementById(id).classList.add("active");
@@ -368,9 +430,57 @@ function classify(){
   snack:foods.filter(x=>match(x,"popcorn|peanut|groundnut|cashew|almond|walnut|nuts|fruit|apple|banana|berries|orange|mango|pineapple|yogurt|boiled egg|egg|carrot|cucumber") || custom.some(c=>c.useSnack && c.keys.some(k=>x.toLowerCase().includes(k))))
  };
 }
+
+function categoryGroup(label){
+ const l=(label||"").toLowerCase();
+ if(l.includes("protein")) return "protein";
+ if(l.includes("vegetable")) return "veg";
+ if(l.includes("carb")) return "carb";
+ if(l.includes("fruit")) return "fruit";
+ if(l.includes("fat") || l.includes("dairy")) return "fat";
+ if(l.includes("snack")) return "snack";
+ return "other";
+}
+function buildKitchenBalance(c){
+ const fruit=c.all.filter(x=>findFoodInfo(x).some(info=>categoryGroup(info.cat)==="fruit"));
+ const status=(arr, good, okay)=> arr.length>=good ? "✅ Good" : arr.length>=okay ? "⚠️ Low" : "❌ Missing";
+ return `<b>Kitchen Balance</b>
+ <div class="balance-grid">
+  <div class="balance-item">Protein<br><b>${status(c.protein,2,1)}</b></div>
+  <div class="balance-item">Vegetables<br><b>${status(c.veg,2,1)}</b></div>
+  <div class="balance-item">Carbs<br><b>${status(c.carb,1,1)}</b></div>
+  <div class="balance-item">Fruit<br><b>${status(fruit,1,1)}</b></div>
+ </div>`;
+}
+function smartMealRows(c,n,mode,mealTime){
+ let proteins=c.protein.length?c.protein:["Add protein"];
+ let veg=c.veg.length?c.veg:["Add vegetables"];
+ let carbs=c.carb.length?c.carb:["Add starch"];
+ let rows=`<table><tr><th>Day</th><th>${mealTime} Meal</th><th>Focus</th></tr>`;
+ let liverCount=0;
+ for(let i=0;i<n;i++){
+  let p=pick(proteins,i,"Protein");
+  if(/liver/i.test(p) && liverCount>=3){
+    const alt=proteins.filter(x=>!/liver/i.test(x));
+    p=alt.length?pick(alt,i,"Another protein"):"Another protein";
+  }
+  if(/liver/i.test(p)) liverCount++;
+  const v=pick(veg,i,"Vegetables");
+  const st=pick(carbs,i,"Starch");
+  let focus="Balanced plate";
+  if(mode==="weight") focus="More vegetables, moderate starch";
+  if(mode==="bp") focus="Go light on salt; use herbs, onion, tomato, ginger, pepper";
+  if(mode==="comfort") focus="Comfort meal, controlled portion";
+  rows+=`<tr><td>${["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][i%7]} ${i>=7?Math.floor(i/7)+1:""}</td><td><b>${p}</b> + ${v} + ${st}</td><td>${focus}</td></tr>`;
+ }
+ rows+="</table>";
+ return rows;
+}
+
 function analyzeFoods(){
  updateFoodCount();
  const c=classify();
+ if($("kitchenBalance")) $("kitchenBalance").innerHTML=buildKitchenBalance(c);
  $("categories").innerHTML = `
  <b>Protein:</b> ${badges(c.protein)}<br>
  <b>Vegetables:</b> ${badges(c.veg)}<br>
@@ -469,29 +579,7 @@ function toggleCustomFoodPanel(){
 
 function generatePlan(){
  const c=classify(), mode=$("mode").value, n=Number($("daysToPlan").value), mealTime=$("mealTime").value || "Main meal";
- let proteins=c.protein.length?c.protein:["Add protein"];
- let veg=c.veg.length?c.veg:["Add vegetables"];
- let carbs=c.carb.length?c.carb:["Add starch"];
- let html="<table><tr><th>Day</th><th>"+mealTime+" Meal</th><th>Focus</th></tr>";
- let liverCount=0;
- for(let i=0;i<n;i++){
-  let p=pick(proteins,i,"Protein");
-  if(/liver/i.test(p) && liverCount>=3){
-    const alt=proteins.filter(x=>!/liver/i.test(x));
-    p=alt.length?pick(alt,i,"Another protein"):"Another protein";
-  }
-  if(/liver/i.test(p)) liverCount++;
-  let v=pick(veg,i,"Vegetables");
-  let st=pick(carbs,i,"Starch");
-  let focus="Balanced plate";
-  if(mode==="weight") focus="More vegetables, moderate starch";
-  if(mode==="bp") focus="Go light on salt; use herbs, onion, tomato, ginger, pepper";
-  if(mode==="comfort") focus="Comfort meal, controlled portion";
-  if(/liver/i.test(p)) focus+="; nutrient-dense day";
-  if(/spaghetti|pasta/i.test(st)) focus+="; watch portion";
-  html+=`<tr><td>${["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][i%7]} ${i>=7?Math.floor(i/7)+1:""}</td><td><b>${p}</b> + ${v} + ${st}</td><td>${focus}</td></tr>`;
- }
- html+="</table>";
+ const html=smartMealRows(c,n,mode,mealTime);
  $("plan").innerHTML=html;
  generateSmoothiePlan(c);
  updateDynamicTip(c);
@@ -862,6 +950,7 @@ window.addEventListener("load",()=>{
  const sp=localStorage.getItem("piwiSnackPlan"); if(sp && $("snackPlan")) $("snackPlan").innerHTML=sp;
  const smp=localStorage.getItem("piwiSmoothiePlan"); if(smp && $("smoothiePlan")) $("smoothiePlan").innerHTML=smp;
  $("analyzeBtn").addEventListener("click",analyzeFoods);
+ if($("toggleFoodValuesBtn")) $("toggleFoodValuesBtn").addEventListener("click",toggleFoodValues);
  $("saveFoodsBtn").addEventListener("click",()=>{localStorage.setItem("piwiFoods3",$("foods").value);alert("Foods saved.");});
  $("generateBtn").addEventListener("click",generatePlan);
  $("groceryBtn").addEventListener("click",generateGrocery);
