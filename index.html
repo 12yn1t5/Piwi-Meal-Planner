@@ -60,6 +60,12 @@ footer{text-align:center;color:var(--muted);padding:22px;font-size:13px}
 .collapse-header{display:flex;justify-content:space-between;align-items:center;gap:10px}
 @media(max-width:820px){.balance-grid{grid-template-columns:1fr 1fr}}
 
+
+.score-pill{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px 8px;margin:2px;font-size:12px}
+.score-good{background:#e8f5ec;color:#247345}
+.score-watch{background:#fff4d9;color:#8a5a00}
+.score-limit{background:#fff0f4;color:#8a3a3a}
+
 </style>
 </head>
 <body>
@@ -200,6 +206,8 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
   <section class="card">
     <h2>Meal plan</h2>
     
+    <div id="teaPlan" class="info" style="margin-bottom:10px">Tap <b>Generate Meal Plan</b> to see tea / healthy drink options.</div>
+
     <div id="smoothiePlan" class="info" style="margin-bottom:10px">
       Tap <b>Generate Meal Plan</b> to see morning water + smoothie options.
     </div>
@@ -277,7 +285,7 @@ Spaghetti with peanut butter tomatoes onion green pepper</textarea>
 </section>
 </main>
 
-<footer>Piwi Meal Planner v4.0 Intelligence<br><em>Simple planning. Better eating.</em></footer>
+<footer>Piwi Meal Planner v4.2 Nutrition Scoring<br><em>Simple planning. Better eating.</em></footer>
 
 <script>
 const foodDB = [
@@ -387,7 +395,23 @@ const foodDB = [
  {keys:["carrot","carrots"], name:"Carrots", cat:"Snack + Vegetable", benefits:"Crunchy, low-calorie snack with fiber and beta-carotene.", caution:"Very easy snack option; pair with protein/fat if still hungry."},
  {keys:["cucumber","cucumbers"], name:"Cucumber", cat:"Snack + Vegetable", benefits:"Hydrating, low-calorie snack.", caution:"May not be filling alone; pair with yogurt, eggs, or nuts if needed."},
  {keys:["dates"], name:"Dates", cat:"Snack + Fruit", benefits:"Naturally sweet and quick energy.", caution:"Very sweet; keep portions small."},
- {keys:["dried fruit","raisins"], name:"Dried Fruit", cat:"Snack + Fruit", benefits:"Portable sweet snack.", caution:"Concentrated sugar; small portions work best."}
+ {keys:["dried fruit","raisins"], name:"Dried Fruit", cat:"Snack + Fruit", benefits:"Portable sweet snack.", caution:"Concentrated sugar; small portions work best."},
+ {keys:["turmeric","tumeric"], name:"Turmeric", cat:"Spice", benefits:"Bright yellow spice with curcumin compounds; adds flavor and color to teas, soups, and stews.", caution:"Use moderate amounts; it can taste bitter and may not suit everyone in supplement-sized doses."},
+ {keys:["black pepper"], name:"Black Pepper", cat:"Spice", benefits:"Adds heat and flavor; commonly paired with turmeric in small amounts.", caution:"Too much can irritate reflux or sensitive stomachs."},
+ {keys:["clove","cloves"], name:"Cloves", cat:"Spice", benefits:"Warm spice with strong flavor; useful in tea blends and cooking.", caution:"Very strong; use small amounts."},
+ {keys:["cinnamon"], name:"Cinnamon", cat:"Spice", benefits:"Warm spice that can add sweetness without sugar.", caution:"Use moderate amounts; avoid relying on it as medicine."},
+ {keys:["cardamom"], name:"Cardamom", cat:"Spice", benefits:"Aromatic spice that works well in tea, porridge, and warm drinks.", caution:"Strong flavor; small amounts are enough."},
+ {keys:["hibiscus","hibiscus tea"], name:"Hibiscus", cat:"Tea / Drink", benefits:"Tart herbal tea ingredient with deep color; refreshing hot or cold.", caution:"Can be quite tart; avoid over-sweetening."},
+ {keys:["dandelion","dandelion tea"], name:"Dandelion Tea", cat:"Tea / Drink", benefits:"Herbal tea option often used in warm drink routines.", caution:"May not suit everyone; be cautious if sensitive to diuretic-like effects."},
+ {keys:["green tea"], name:"Green Tea", cat:"Tea / Drink", benefits:"Light caffeinated tea with antioxidants; can fit a morning or afternoon routine.", caution:"Contains caffeine; avoid late day if it affects sleep."},
+ {keys:["black tea"], name:"Black Tea", cat:"Tea / Drink", benefits:"Caffeinated tea that can be enjoyed plain or with milk/spices.", caution:"Contains caffeine; watch added sugar."},
+ {keys:["ginger tea"], name:"Ginger Tea", cat:"Tea / Drink", benefits:"Warm, spicy drink that pairs well with lemon, cloves, and honey.", caution:"Too much ginger can bother reflux."},
+ {keys:["lemon water"], name:"Lemon Water", cat:"Tea / Drink", benefits:"Simple flavored water option that can support hydration.", caution:"Acidic; rinse mouth with plain water if using often."},
+ {keys:["honey"], name:"Honey", cat:"Sweetener", benefits:"Natural sweetener that can soften strong teas and ginger drinks.", caution:"Still sugar; use small amounts."},
+ {keys:["coconut milk"], name:"Coconut Milk", cat:"Healthy Fat / Dairy Alternative", benefits:"Creamy dairy-free option for meals, tea, or smoothies.", caution:"Can be calorie-dense, especially canned coconut milk."},
+ {keys:["almond milk"], name:"Almond Milk", cat:"Dairy Alternative", benefits:"Light dairy-free option for smoothies or tea.", caution:"Often low in protein unless fortified; choose unsweetened when possible."},
+ {keys:["soy milk"], name:"Soy Milk", cat:"Dairy Alternative + Protein", benefits:"Dairy-free option with more protein than many plant milks.", caution:"Choose unsweetened if watching sugar."},
+
 ];
 
 function $(id){return document.getElementById(id);}
@@ -427,7 +451,8 @@ function classify(){
   veg:foods.filter(x=>match(x,"veggie|vegetable|spinach|kale|greens|dodo|amaranth|nakati|sukuma|collard|cabbage|pepper|tomato|onion|broccoli|salad|carrot|celery|cucumber|okra|eggplant|biringanya") || customCat(x,["Vegetable"])),
   carb:foods.filter(x=>match(x,"potato|plantain|gonja|spaghetti|rice|pasta|yam|cassava|muwogo|matooke|matoke|oat|bread|sweet|posho|ugali|millet|chapati|pilau|katogo|rolex") || customCat(x,["Carb","Mixed Dish"])),
   fat:foods.filter(x=>match(x,"peanut|avocado|olive|nuts|cashew|sesame|flax|chia|almond|walnut") || customCat(x,["Healthy Fat"])),
-  snack:foods.filter(x=>match(x,"popcorn|peanut|groundnut|cashew|almond|walnut|nuts|fruit|apple|banana|berries|orange|mango|pineapple|yogurt|boiled egg|egg|carrot|cucumber") || custom.some(c=>c.useSnack && c.keys.some(k=>x.toLowerCase().includes(k))))
+  snack:foods.filter(x=>match(x,"popcorn|peanut|groundnut|cashew|almond|walnut|nuts|fruit|apple|banana|berries|orange|mango|pineapple|yogurt|boiled egg|egg|carrot|cucumber|dates") || custom.some(c=>c.useSnack && c.keys.some(k=>x.toLowerCase().includes(k)))),
+  tea:foods.filter(x=>match(x,"tea|hibiscus|dandelion|ginger tea|green tea|black tea|lemon water|cloves|clove|turmeric|tumeric|black pepper|honey|cinnamon|cardamom|dates"))
  };
 }
 
@@ -452,26 +477,110 @@ function buildKitchenBalance(c){
   <div class="balance-item">Fruit<br><b>${status(fruit,1,1)}</b></div>
  </div>`;
 }
+
+function foodScoreType(food){
+ const infos=findFoodInfo(food);
+ const cats=infos.map(i=>(i.cat||"").toLowerCase()).join(" ");
+ const name=(food||"").toLowerCase();
+ if(cats.includes("protein")) return "protein";
+ if(cats.includes("vegetable")) return "vegetable";
+ if(cats.includes("carb")) return "carb";
+ if(cats.includes("fruit")) return "fruit";
+ if(cats.includes("fat") || cats.includes("dairy")) return "fat";
+ if(cats.includes("snack")) return "snack";
+ if(/chicken|fish|egg|beans|lentil|beef|goat|pork|turkey|tofu|liver|yogurt|milk/.test(name)) return "protein";
+ if(/spinach|kale|greens|cabbage|broccoli|tomato|onion|pepper|carrot|celery|cucumber|nakati|dodo|sukuma/.test(name)) return "vegetable";
+ if(/rice|matooke|potato|plantain|cassava|posho|ugali|spaghetti|pasta|chapati|yam|oats/.test(name)) return "carb";
+ if(/apple|banana|berry|berries|strawberry|blueberry|mango|orange|pineapple|grape|pear|kiwi|watermelon|papaya/.test(name)) return "fruit";
+ if(/avocado|peanut|groundnut|cashew|almond|walnut|olive|simsim|sesame/.test(name)) return "fat";
+ return "other";
+}
+function foodNutritionTags(food){
+ const name=(food||"").toLowerCase();
+ const tags=[];
+ if(/milk|yogurt|cheese|cottage|kefir/.test(name)) tags.push("calcium");
+ if(/liver|beef|beans|lentil|spinach|greens|dodo|nakati/.test(name)) tags.push("iron");
+ if(/fish|salmon|sardine|tuna|chia|flax|walnut/.test(name)) tags.push("omega/supportive fats");
+ if(/berry|berries|strawberry|blueberry|blackberry|raspberry|mango|orange|pineapple|papaya|kiwi/.test(name)) tags.push("fruit variety");
+ if(/spinach|kale|broccoli|cabbage|greens|nakati|dodo|sukuma|collard/.test(name)) tags.push("green vegetables");
+ return tags;
+}
+function mealNutritionScore(meal, context){
+ let score=0;
+ const notes=[];
+ const p=meal.protein||"", v=meal.veg||"", c=meal.carb||"", f=meal.fat||"";
+ if(p && !/^Add /.test(p)){score+=40; notes.push("protein anchor");} else {score-=35; notes.push("missing protein");}
+ if(v && !/^Add /.test(v)){score+=30; notes.push("vegetables included");} else {score-=35; notes.push("missing vegetables");}
+ if(c && !/^Add /.test(c)){score+=18; notes.push("smart carb");} else {score-=10;}
+ if(f && !/^Add /.test(f)){score+=8; notes.push("healthy fat support");}
+ if(p && context.lastProtein && p===context.lastProtein){score-=12; notes.push("protein repeated");}
+ if(c && context.lastCarb && c===context.lastCarb){score-=6; notes.push("carb repeated");}
+ if(/liver/i.test(p)){
+   if(context.liverCount>=2){score-=30; notes.push("liver limited");}
+   else {score+=8; notes.push("iron-rich");}
+ }
+ if(/spaghetti|pasta/i.test(c)){
+   if(context.pastaCount>=2){score-=15; notes.push("pasta limited");}
+   else notes.push("watch pasta portion");
+ }
+ if(/chapati|fried|mandazi|chips/i.test(p+" "+c+" "+f)){
+   score-=15; notes.push("richer/oilier choice");
+ }
+ const nutrientTags=[...foodNutritionTags(p),...foodNutritionTags(v),...foodNutritionTags(c),...foodNutritionTags(f)];
+ if(nutrientTags.includes("calcium") && !context.usedCalcium){score+=5; notes.push("adds calcium source");}
+ if(nutrientTags.includes("iron") && !context.usedIron){score+=5; notes.push("adds iron source");}
+ if(nutrientTags.includes("green vegetables")) score+=5;
+ return {score,notes:[...new Set(notes)]};
+}
+function chooseNutritionMeal(c, dayIndex, context){
+ const proteins=c.protein.length?c.protein:["Add protein"];
+ const vegs=c.veg.length?c.veg:["Add vegetables"];
+ const carbs=c.carb.length?c.carb:["Add starch"];
+ const fats=(c.fat&&c.fat.length)?c.fat:[""];
+ let best=null;
+ proteins.forEach(p=>{
+  vegs.forEach(v=>{
+   carbs.forEach(st=>{
+    // Include fats only sometimes so meals do not become too heavy.
+    const fatOptions = dayIndex%2===0 ? fats : [""].concat(fats.slice(0,1));
+    fatOptions.forEach(f=>{
+     const meal={protein:p,veg:v,carb:st,fat:f};
+     const result=mealNutritionScore(meal,context);
+     // Slight rotation bonus so the same first items don't dominate every day.
+     result.score -= Math.abs(proteins.indexOf(p)-dayIndex%proteins.length)*1.5;
+     result.score -= Math.abs(vegs.indexOf(v)-dayIndex%vegs.length)*1;
+     result.score -= Math.abs(carbs.indexOf(st)-dayIndex%carbs.length)*1;
+     if(!best || result.score>best.score) best={...meal,score:Math.round(result.score),notes:result.notes};
+    });
+   });
+  });
+ });
+ return best || {protein:"Add protein",veg:"Add vegetables",carb:"Add starch",fat:"",score:0,notes:["add more foods"]};
+}
+function scoreClass(score){
+ if(score>=85) return "score-good";
+ if(score>=60) return "score-watch";
+ return "score-limit";
+}
+
 function smartMealRows(c,n,mode,mealTime){
- let proteins=c.protein.length?c.protein:["Add protein"];
- let veg=c.veg.length?c.veg:["Add vegetables"];
- let carbs=c.carb.length?c.carb:["Add starch"];
- let rows=`<table><tr><th>Day</th><th>${mealTime} Meal</th><th>Focus</th></tr>`;
- let liverCount=0;
+ let rows=`<table><tr><th>Day</th><th>${mealTime} Meal</th><th>Nutrition score</th><th>Why Piwi chose it</th></tr>`;
+ const context={lastProtein:"",lastCarb:"",liverCount:0,pastaCount:0,usedCalcium:false,usedIron:false};
  for(let i=0;i<n;i++){
-  let p=pick(proteins,i,"Protein");
-  if(/liver/i.test(p) && liverCount>=3){
-    const alt=proteins.filter(x=>!/liver/i.test(x));
-    p=alt.length?pick(alt,i,"Another protein"):"Another protein";
-  }
-  if(/liver/i.test(p)) liverCount++;
-  const v=pick(veg,i,"Vegetables");
-  const st=pick(carbs,i,"Starch");
+  const meal=chooseNutritionMeal(c,i,context);
+  if(/liver/i.test(meal.protein)) context.liverCount++;
+  if(/spaghetti|pasta/i.test(meal.carb)) context.pastaCount++;
+  if(foodNutritionTags(meal.protein).includes("calcium") || foodNutritionTags(meal.fat).includes("calcium")) context.usedCalcium=true;
+  if(foodNutritionTags(meal.protein).includes("iron") || foodNutritionTags(meal.veg).includes("iron")) context.usedIron=true;
+  context.lastProtein=meal.protein;
+  context.lastCarb=meal.carb;
   let focus="Balanced plate";
   if(mode==="weight") focus="More vegetables, moderate starch";
   if(mode==="bp") focus="Go light on salt; use herbs, onion, tomato, ginger, pepper";
   if(mode==="comfort") focus="Comfort meal, controlled portion";
-  rows+=`<tr><td>${["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][i%7]} ${i>=7?Math.floor(i/7)+1:""}</td><td><b>${p}</b> + ${v} + ${st}</td><td>${focus}</td></tr>`;
+  const fatText=meal.fat?` + <em>${meal.fat}</em>`:"";
+  const noteText=meal.notes.slice(0,4).map(n=>`<span class="score-pill">${n}</span>`).join(" ");
+  rows+=`<tr><td>${["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][i%7]} ${i>=7?Math.floor(i/7)+1:""}</td><td><b>${meal.protein}</b> + ${meal.veg} + ${meal.carb}${fatText}</td><td><span class="score-pill ${scoreClass(meal.score)}">${meal.score}</span></td><td>${noteText}<br><span class="small">${focus}</span></td></tr>`;
  }
  rows+="</table>";
  return rows;
@@ -486,7 +595,8 @@ function analyzeFoods(){
  <b>Vegetables:</b> ${badges(c.veg)}<br>
  <b>Carbs:</b> ${badges(c.carb)}<br>
  <b>Healthy fats/extras:</b> ${badges(c.fat)}<br>
- <b>Snacks/fruits:</b> ${badges(c.snack)}
+ <b>Snacks/fruits:</b> ${badges(c.snack)}<br>
+ <b>Tea / healthy drinks:</b> ${badges(c.tea||[])}
  `;
  let seen=new Set(), cards="";
  getFoods().forEach(food=>{
@@ -509,11 +619,37 @@ function analyzeFoods(){
 function badges(arr){return arr.length?arr.map(x=>`<span class='badge'>${x}</span>`).join(""):"—";}
 function pick(arr,i,fallback){return arr.length?arr[i%arr.length]:fallback;}
 function updateDynamicTip(c){
- let tip="<b>Plate guide:</b> Aim for ½ vegetables, ¼ protein, ¼ starch. Keep meals simple and realistic.";
+ let tip="<b>Nutrition scoring:</b> Piwi prioritizes protein + vegetables + smart carbs, adds healthy fats when useful, reduces repetition, and limits richer foods like liver/pasta/fried items.";
  if(c.all.some(x=>/liver/i.test(x))) tip += " Since liver is included this week, keep it around 2–3 meals rather than every day.";
  if(c.all.some(x=>/peanut|spaghetti|pasta/i.test(x))) tip += " Peanut/pasta meals can be satisfying; keep the portion moderate and pair with vegetables/protein.";
  if(c.all.some(x=>/fried/i.test(x))) tip += " Fried foods can fit occasionally, but portions matter.";
  $("dynamicTip").innerHTML=tip;
+}
+
+
+function generateTeaPlan(c){
+ const all=(c.all||[]).map(x=>x.toLowerCase());
+ function hasAny(words){return all.some(f=>words.some(w=>f.includes(w)));}
+ const hasHibiscus=hasAny(["hibiscus"]);
+ const hasGinger=hasAny(["ginger"]);
+ const hasLemon=hasAny(["lemon"]);
+ const hasClove=hasAny(["clove"]);
+ const hasTurmeric=hasAny(["turmeric","tumeric"]);
+ const hasHoney=hasAny(["honey"]);
+ const sweetener=hasHoney ? "small amount of honey" : "optional small sweetener";
+ const lemon=hasLemon ? "lemon" : "lemon if available";
+ const ginger=hasGinger ? "ginger" : "ginger if available";
+ const clove=hasClove ? "cloves" : "cloves if available";
+ const turmeric=hasTurmeric ? "turmeric" : "turmeric if available";
+ let html="<h3>Tea / healthy drink options</h3>";
+ html+="<p>Use these as optional warm drinks. Keep sweeteners light and let spices carry the flavor.</p>";
+ html+="<table><tr><th>Option</th><th>Tea idea</th><th>Piwi note</th></tr>";
+ html+=`<tr><td>Option 1</td><td>${hasHibiscus?"hibiscus":"hibiscus if available"} + ${ginger} + ${lemon}</td><td>Bright, tart, and refreshing.</td></tr>`;
+ html+=`<tr><td>Option 2</td><td>${ginger} + ${clove} + ${lemon} + ${sweetener}</td><td>Warm and strong; use cloves lightly.</td></tr>`;
+ html+=`<tr><td>Option 3</td><td>${turmeric} + ${ginger} + tiny pinch black pepper + ${sweetener}</td><td>Spiced tea; keep turmeric and pepper moderate.</td></tr>`;
+ html+="</table>";
+ $("teaPlan").innerHTML=html;
+ localStorage.setItem("piwiTeaPlan", html);
 }
 
 function generateSnackPlan(c){
@@ -581,6 +717,7 @@ function generatePlan(){
  const c=classify(), mode=$("mode").value, n=Number($("daysToPlan").value), mealTime=$("mealTime").value || "Main meal";
  const html=smartMealRows(c,n,mode,mealTime);
  $("plan").innerHTML=html;
+ generateTeaPlan(c);
  generateSmoothiePlan(c);
  updateDynamicTip(c);
  generateSnackPlan(c);
@@ -594,14 +731,16 @@ function generateGrocery(){
  <b>Vegetables:</b> ${badges(c.veg)}<br>
  <b>Carbs:</b> ${badges(c.carb)}<br>
  <b>Healthy fats/extras:</b> ${badges(c.fat)}<br>
- <b>Snacks/fruits:</b> ${badges(c.snack)}`;
- let additions = {Protein:[], Vegetables:[], Carbs:[], "Healthy fats/extras":[], "Snacks":[], Fruits:[], Flavor:[]};
+ <b>Snacks/fruits:</b> ${badges(c.snack)}<br>
+ <b>Tea / healthy drinks:</b> ${badges(c.tea||[])}`;
+ let additions = {Protein:[], Vegetables:[], Carbs:[], "Healthy fats/extras":[], "Snacks":[], Fruits:[], "Tea / drinks":[], Flavor:[]};
  if(c.protein.length<2) additions.Protein.push("Eggs", "Greek yogurt", "Beans", "Fish", "Lentils");
  if(c.veg.length<2) additions.Vegetables.push("Cabbage", "Carrots", "Broccoli", "Cucumber", "Salad greens");
  if(c.carb.length<1) additions.Carbs.push("Sweet potatoes", "Rice", "Plantain", "Oats", "Irish potatoes");
  if(c.fat.length<1) additions["Healthy fats/extras"].push("Ground flaxseed", "Chia seeds", "Avocado", "Olive oil");
  if(c.snack.length<2) additions.Snacks.push("Popcorn", "Peanuts/groundnuts", "Cashews", "Boiled eggs", "Carrots", "Cucumber");
  if(!c.all.some(x=>/fruit|apple|banana|berries|orange|mango|pineapple/i.test(x))) additions.Fruits.push("Green apples", "Berries", "Oranges", "Bananas", "Mango");
+ if(!c.all.some(x=>/tea|hibiscus|ginger|lemon|clove|turmeric|tumeric|honey/i.test(x))) additions["Tea / drinks"].push("Hibiscus", "Ginger", "Lemon", "Cloves", "Turmeric", "Honey");
  if(!c.all.some(x=>/lemon|ginger/i.test(x))) additions.Flavor.push("Lemon", "Ginger");
  let addHtml="<h3>Recommended additions</h3>";
  Object.keys(additions).forEach(k=>{
@@ -948,6 +1087,7 @@ window.addEventListener("load",()=>{
  const p=localStorage.getItem("piwiPlan3"); if(p) $("plan").innerHTML=p;
  const t=localStorage.getItem("piwiTip3"); if(t) $("dynamicTip").innerHTML=t;
  const sp=localStorage.getItem("piwiSnackPlan"); if(sp && $("snackPlan")) $("snackPlan").innerHTML=sp;
+ const tp=localStorage.getItem("piwiTeaPlan"); if(tp && $("teaPlan")) $("teaPlan").innerHTML=tp;
  const smp=localStorage.getItem("piwiSmoothiePlan"); if(smp && $("smoothiePlan")) $("smoothiePlan").innerHTML=smp;
  $("analyzeBtn").addEventListener("click",analyzeFoods);
  if($("toggleFoodValuesBtn")) $("toggleFoodValuesBtn").addEventListener("click",toggleFoodValues);
